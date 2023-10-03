@@ -1,2 +1,3 @@
 # Wolf_Back_October
-new wolf back-end repo
+
+A rebuild of wolf_back repo for the new changes
