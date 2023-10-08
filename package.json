@@ -4,6 +4,8 @@
   "description": "A rebuild of wolf_back repo for the new changes",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon .",
+    "production": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
