@@ -12,10 +12,6 @@ const colorschema = new Schema({
         type: String,
         required:true
     },
-    count:{
-        type:Number,
-        required:true
-    },
     color_hex:{
             type: String,
             required:true,

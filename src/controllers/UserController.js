@@ -57,7 +57,7 @@ const signUp = async (req, res) => {
       res.json({
         success: true,
         message: "Signed up successfully",
-        email:response.email
+        email: response.email
       });
     });
   } catch (error) {
@@ -115,7 +115,7 @@ const login = async (req, res, next) => {
     const isNewUser = await User.isThisEmailUse(email);
     if (isNewUser) {
       return res.json({
-        success:false,
+        success: false,
         message: "Id or password is invalid",
       });
     }
@@ -131,24 +131,24 @@ const login = async (req, res, next) => {
 
             if (result) {
               let token = jwt.sign(
-                { email: user.email, id: user._id },
+                { email: user.email, id: user._id, name: user.first_name + " " + user.last_name },
                 process.env.JWT_KEY
               );
               res.json({
-                success:true,
+                success: true,
                 message: "Login Successful!",
                 token: token,
               });
             } else {
               res.json({
-                success:false,
+                success: false,
                 message: "Id or password is invalid",
               });
             }
           });
         } else {
           res.json({
-            success:false,
+            success: false,
             message: "Id or password is invalid",
           });
         }
@@ -156,7 +156,7 @@ const login = async (req, res, next) => {
     );
   } catch (error) {
     res.json({
-        success:false,
+      success: false,
       message: "Error",
     });
   }
@@ -221,7 +221,7 @@ const view = async (req, res) => {
   try {
     const user = await User.findById(req.body.decoded.id);
     if (!user) {
-      return res.json({success:false, message: "User not found" });
+      return res.json({ success: false, message: "User not found" });
     }
 
     const updatedViewed = [
@@ -237,9 +237,9 @@ const view = async (req, res) => {
       { new: true }
     );
 
-    return res.json({ message: "Viewed array updated successfully" ,success:true,});
+    return res.json({ message: "Viewed array updated successfully", success: true, });
   } catch (error) {
-    res.json({ success:false,message: "Error 500" });
+    res.json({ success: false, message: "Error 500" });
   }
 };
 const viewed = async (req, res) => {
@@ -247,7 +247,7 @@ const viewed = async (req, res) => {
     const user = await User.findById(req.body.decoded.id);
 
     if (!user) {
-      return json({success:false, message: "User not found" });
+      return json({ success: false, message: "User not found" });
     } else {
       product
         .find({
@@ -263,7 +263,7 @@ const viewed = async (req, res) => {
         });
     }
   } catch (error) {
-    res.status(200).json({ success:false,message: "Error 500" });
+    res.status(200).json({ success: false, message: "Error 500" });
   }
 };
 const changepassword = async (req, res) => {

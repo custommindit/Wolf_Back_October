@@ -1,7 +1,7 @@
-const Color = require("../models/colors");
+const Size = require("../models/size");
 
-module.exports.AllColors = (req, res) => {
-  Color.find()
+module.exports.AllSize = (req, res) => {
+  Size.find()
     .then((response) => {
       res.json({
         response,
@@ -15,7 +15,7 @@ module.exports.AllColors = (req, res) => {
 };
 
 module.exports.bysubcategory = (req, res) => {
-  Color.find({
+  Size.find({
     sub_category: req.params.sub_category
   })
     .then((response) => {

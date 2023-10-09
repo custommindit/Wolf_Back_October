@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const Productschema = new Schema(
+const productSchema = new Schema(
   {
     supplier: {
       type: String,
@@ -13,9 +13,6 @@ const Productschema = new Schema(
       type: String,
       index: true,
     },
-    typeOfProduct: {
-      type: String,
-    },
     first_visit: {
       type: Boolean,
     },
@@ -26,7 +23,6 @@ const Productschema = new Schema(
     SKU: {
       type: String,
       required: true,
-      unique: true,
     },
     price_before: {
       type: Number,
@@ -36,14 +32,13 @@ const Productschema = new Schema(
       type: Number,
       default: 0,
     },
-    imageSrc: {
+    images: {
       type: Array,
       default: [],
     },
     desc: {
       type: Object,
     },
-
     description: {
       type: String,
       required: true,
@@ -73,9 +68,13 @@ const Productschema = new Schema(
       type: String,
     },
     linked_products: [
-        String
+      String
     ],
     color: {
+      type: String,
+      required: true,
+    },
+    size: {
       type: String,
       required: true,
     },
@@ -87,5 +86,6 @@ const Productschema = new Schema(
   { timestamps: true }
 );
 
-module.exports =
-  mongoose.model.Product || mongoose.model("Product", Productschema);
+
+const Product = mongoose.model("product", productSchema);
+module.exports = Product;

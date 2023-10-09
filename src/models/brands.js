@@ -10,10 +10,10 @@ const brandschema = new Schema({
         type: String,
         required:true
     },
-    count:{
-        type:Number,
+    image: {
+        type: String,
         required:true
-    }
+    },
 })
 
 
