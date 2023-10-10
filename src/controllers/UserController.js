@@ -52,6 +52,7 @@ const signUp = async (req, res) => {
       first_name: body.first_name,
       last_name: body.last_name,
       telephone: body.telephone,
+      ban: false,
     });
     user.save().then((response) => {
       res.json({
@@ -187,8 +188,53 @@ const getall = async (req, res) => {
   }
 };
 
-/////pagination correction
+const banUser = async (req, res) => {
+  try {
+    if (req.body.decoded.admin)
+      User.findByIdAndUpdate(req.params.id, {$set: {ban: true}}, {new: true})
+        .then((response) => {
+          res.json({
+            response,
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+          res.json({
+            message: "An error Occured!",
+          });
+        });
+    else res.json({ message: "An error Occured!" });
+  } catch (error) {
+    res.json({
+      message: "Error",
+    });
+  }
+};
 
+const unbanUser = async (req, res) => {
+  try {
+    if (req.body.decoded.admin)
+      User.findByIdAndUpdate(req.params.id, {$set: {ban: false}}, {new: true})
+        .then((response) => {
+          res.json({
+            response,
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+          res.json({
+            message: "An error Occured!",
+          });
+        });
+    else res.json({ message: "An error Occured!" });
+  } catch (error) {
+    res.json({
+      message: "Error",
+    });
+  }
+};
+
+/////pagination correction
 const search = async (req, res) => {
   try {
     console.log(req.body);
@@ -242,6 +288,7 @@ const view = async (req, res) => {
     res.json({ success: false, message: "Error 500" });
   }
 };
+
 const viewed = async (req, res) => {
   try {
     const user = await User.findById(req.body.decoded.id);
@@ -266,6 +313,7 @@ const viewed = async (req, res) => {
     res.status(200).json({ success: false, message: "Error 500" });
   }
 };
+
 const changepassword = async (req, res) => {
   try {
     const id = req.body.decoded.id;
@@ -296,4 +344,6 @@ module.exports = {
   view,
   viewed,
   changepassword,
+  banUser,
+  unbanUser,
 };

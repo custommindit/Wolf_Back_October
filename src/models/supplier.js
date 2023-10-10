@@ -11,7 +11,7 @@ const supplierSchema = new Schema({
     password: {
         type: String
     },
-    enabled: {
+    ban: {
         type:Boolean
     }
 }, {timeseries: true})
