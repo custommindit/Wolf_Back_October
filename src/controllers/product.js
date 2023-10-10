@@ -32,7 +32,7 @@ module.exports.getProductById = (req, res, next) => {
 
 module.exports.getProductsBySupCategory = (req, res, next) => {
   try {
-    Product.find({ subCategory: req.parmas.id }).then((products) => {
+    Product.find({ subCategory: req.parmas.id,view:true }).then((products) => {
       return res.json({
         status: true,
         products: products,
@@ -164,4 +164,152 @@ module.exports.uplodaImage = async (req, res, next) => {
       message: error.message,
     });
   }
+};
+
+module.exports.models = async (req, res) => {
+  await getmodels(req.body.gender).then(response => {
+    res.json({ default: JSON.parse(response).models[0], image: JSON.parse(response).model_files[0], response: JSON.parse(response) })
+  })
+    .catch((error) => {
+      res.json({
+        message: "An error Occured!",
+        error: error.message
+      });
+    });
+};
+
+
+module.exports.tryon = async (req, res) => {
+  await requesttryon(req.body.garments, req.body.gender).then(response => {
+    return res.json({ tryon: JSON.parse(response) })
+  })
+    .catch((error) => {
+      res.json({
+        message: "An error Occured!",
+        error: error.message
+      });
+    });
+};
+
+module.exports.getProductByMainCategory = async (req, res) => {
+  let _id = req.params.id;
+  await Product.find({ category_id: _id })
+    .then((e) => {
+      return res.json({
+        response: e,
+      });
+    })
+    .catch((err) => {
+      return res.json({ message: err.message });
+    });
+};
+
+module.exports.getProductFirstVisit = async (req, res) => {
+  let _id = req.params.id;
+  await Product.find({ category_id: _id, first_visit: true })
+    .then((e) => {
+      return res.json({
+        response: e,
+      });
+    })
+    .catch((err) => {
+      return res.json({ message: err.message });
+    });
+};
+
+module.exports.UpdateFirstVisitProduct = async (req, res) => {
+  const body = req.body;
+  let _id = new mongoose.Types.ObjectId(req.params.id);
+  await Product.findOneAndUpdate({ _id: _id }, { $set: body }, { new: true })
+    .then((e) => {
+      return res.status(200).json(e);
+    })
+    .catch((err) => {
+      return res.json({ message: "Error" });
+    });
+};
+module.exports.recomm = (req, res) => {
+  Product.aggregate([
+      {$match:{ view:true,category_id:req.body.category_id}},
+    { $sample: { size: 8 } }
+  
+  ])
+    .then((response) => {
+      res.json({
+        response,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        message: "An error Occured!",
+      });
+    });
+};
+
+
+module.exports.SearchByName = (req, res) => {
+  Product.find({
+    name: { $regex: ".*" + req.body.query + ".*", $options: "i" },
+    view: true
+  })
+    .limit(8)
+    .then((response) => {
+      res.json({
+        response,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        message: "An error Occured!",
+      });
+    });
+};
+module.exports.SearchByNameBulk = (req, res) => {
+  Product.find({
+    name: { $regex: ".*" + req.body.query + ".*", $options: "i" },
+    view: true
+  })
+    .then((response) => {
+      res.json({
+        response,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        message: "An error Occured!",
+      });
+    });
+};
+
+module.exports.cart = async (req, res) => {
+  const ids = req.body.products;
+  const products = [];
+  for (var i = 0; i < ids.length; i++) {
+    await Product.findById(ids[i])
+      .then(response => {
+        products.push(response)
+      })
+      .catch(error => {
+        res.json({
+          message: 'An error Occured!'
+        })
+      })
+  }
+  if (products.length === ids.length) {
+    res.json({ response: products })
+  }
+};
+
+
+module.exports.getProductBySubCategory2 = async (req, res) => {
+  let _id = req.params.id;
+  await Product.find({ subCategory: _id })
+    .then((e) => {
+      return res.json({
+        response: e,
+      });
+    })
+    .catch((err) => {
+      return res.json({ message: err.message });
+    });
 };

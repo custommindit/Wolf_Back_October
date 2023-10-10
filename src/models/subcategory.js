@@ -10,6 +10,10 @@ const SubCategorySchema = new Schema({
     },
     view: {
         type: Boolean
+    },
+    Image:{
+        type:String
+        ,required:true
     }
 })
 
