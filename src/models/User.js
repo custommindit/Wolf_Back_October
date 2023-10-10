@@ -26,16 +26,19 @@ const userSchema = new Schema({
     },
     viewed: [{
         type: String
-      }]
-}, {timeseries: true})
+    }],
+    ban: {
+        type: Boolean
+    },
+}, { timeseries: true })
 
 userSchema.statics.isThisEmailUsed = async function (email) {
-    if(!email) throw new Error('Invalid email')
-    try{
-        const user = await this.findOne({email})
-        if(user) return true
+    if (!email) throw new Error('Invalid email')
+    try {
+        const user = await this.findOne({ email })
+        if (user) return true
         return false
-    }catch (error){
+    } catch (error) {
         console.log('error inside isThisEmailUsed method ', error.message)
         return false
     }
