@@ -4,11 +4,17 @@ const Product = require('../models/product')
 
 module.exports.add_subcategory = async (req, res) => {
     const body = req.body
-    const subcategory = new SubCategory(body)
+
+    const subcategory = new SubCategory({
+        name: body.name,
+        main_category: body.main_category,
+        view:true,
+        Image:body.image
+    })
     await subcategory.save().then(e => {
         res.status(200).json(e)
     }).catch(err => {
-        console.log(err.message)
+
         res.status(401).json({ error: err.message })
     })
 }

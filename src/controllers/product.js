@@ -48,11 +48,11 @@ module.exports.getProductsBySupCategory = (req, res, next) => {
 };
 
 module.exports.uplodaImage = async (req, res, next) => {
+  
+  let images = [];
   if (!req.files || req.files.length ===0) {
     return res.status(400).send("No file uploaded");
   }
-  let images = [];
-
   for (var i = 0; i < req.files.length; i++) {
     images.push(`${req.files[i].path}`);
   }
@@ -311,5 +311,39 @@ module.exports.getProductBySubCategory2 = async (req, res) => {
     })
     .catch((err) => {
       return res.json({ message: err.message });
+    });
+};
+module.exports.UpdateViewProduct = async (req, res) => {
+  const body = req.body;
+  let _id = new mongoose.Types.ObjectId(req.params.id);
+  await Product.findOneAndUpdate({ _id: _id }, { $set: body }, { new: true })
+    .then((e) => {
+      return res.status(200).json(e);
+    })
+    .catch((err) => {
+      return res.json({ message: "Error" });
+    });
+};
+
+module.exports.DeleteProduct = async (req, res) => {
+  let _id = new mongoose.Types.ObjectId(req.params.id);
+  await Cart.find({ product_id: _id }).then(async (carts) => {
+    for (var i = 0; i < carts.length; i++) {
+      await Cart.deleteMany({ product_id: carts[i].product_id });
+    }
+  });
+
+  await Wish.find({ product_id: _id }).then(async (wishs) => {
+    for (var i = 0; i < wishs.length; i++) {
+      await Wish.deleteMany({ product_id: wishs[i].product_id });
+    }
+  });
+
+  await Product.deleteOne({ _id: _id })
+    .then((e) => {
+      return res.status(200).json(e);
+    })
+    .catch((err) => {
+      return res.json({ message: "Error" });
     });
 };
