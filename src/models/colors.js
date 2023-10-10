@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 function validateColorHexLength(value) {
     return value.length === 6; 
   }
-const colorschema = new Schema({
+const Colorschema = new Schema({
     color_name: {
         type: String,
         required:true
@@ -21,4 +21,5 @@ const colorschema = new Schema({
 
 
 
-module.exports = mongoose.model.Color|| mongoose.model("Color", colorschema);
+const Color = mongoose.model("Color", Colorschema);
+module.exports = Color;

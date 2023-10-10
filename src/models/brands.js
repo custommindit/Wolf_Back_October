@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const brandschema = new Schema({
+const Brandschema = new Schema({
     brand_name: {
         type: String,
         required:true
@@ -17,5 +17,5 @@ const brandschema = new Schema({
 })
 
 
-
-module.exports = mongoose.model.Brand|| mongoose.model("Brand", brandschema);
+const Brand = mongoose.model("Brand", Brandschema);
+module.exports = Brand;

@@ -10,10 +10,7 @@ const sizeschema = new Schema({
         type: String,
         required: true
     },
-    size: {
-        type: String,
-        required: true,
-    }
+
 })
 
 const Size = mongoose.model("size", sizeschema);

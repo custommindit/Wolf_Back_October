@@ -4,7 +4,8 @@ const port = 8080;
 const mongoose = require("mongoose");
 const router = require("./src/routes/index");
 const cors = require("cors");
-const path = require('path');
+const path = require('path'); 
+require("dotenv").config();
 app.use(express.json());
 
 

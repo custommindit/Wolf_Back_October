@@ -37,4 +37,5 @@ CartSchema.statics.isThisCart = async function (product_id, user_id, size, color
 }
 
 
-module.exports = mongoose.model.Cart || mongoose.model("Cart", CartSchema);
+const Cart = mongoose.model("Cart", Cartschema);
+module.exports = Cart;

@@ -16,28 +16,19 @@ module.exports.Create_order_item = async (req, res) => {
     await Product.findById(body.products[i].product_id).then(
       async (product) => {
         if (body.products[i].clothing) {
-          var sizes = product.sizes;
-          var index = product.color.indexOf(body.products[i].color);
-          sizes[body.products[i].size][index];
-          if (typeof sizes[body.products[i].size][index] === "string") {
-            sizes[body.products[i].size][index] =
-              parseInt(sizes[body.products[i].size][index]) -
-              body.products[i].quantity;
-          } else {
-            sizes[body.products[i].size][index] =
-              sizes[body.products[i].size][index] - body.products[i].quantity;
-          }
+          var quantity = product.quantity;
+            quantity[body.products[i].size] =
+              quantity[body.products[i].size] - body.products[i].quantity;
+          
         }
         body.products[i].image = product.imageSrc[0];
-
         body.products[i].SKU = product.SKU;
         body.products[i].name = product.name;
         if (!suppliers.includes(product.supplier)) {
           suppliers.push(product.supplier);
         }
-        if (body.products[i].clothing) {
           await Product.findByIdAndUpdate(body.products[i].product_id, {
-            $set: { sizes: sizes },
+            $set: { quantity: quantity },
           }).then(async (product1) => {
             await Cart.findOneAndDelete({
               product_id: body.products[i].product_id,
@@ -46,19 +37,7 @@ module.exports.Create_order_item = async (req, res) => {
               list.push("Done");
             });
           });
-        }
-        else {
-          await Product.findByIdAndUpdate(body.products[i].product_id, {
-            $inc: { quantity: -body.products[i].quantity },
-          }).then(async (product1) => {
-            await Cart.findOneAndDelete({
-              product_id: body.products[i].product_id,
-              user_id: req.body.decoded.id,
-            }).then((e) => {
-              list.push("Done");
-            });
-          });
-        }
+        
       }
     );
   }

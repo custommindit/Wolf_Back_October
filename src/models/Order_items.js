@@ -1,4 +1,5 @@
-const { Schema, model,ObjectIdSchemaDefinition:ObjectId  } = require('mongoose')
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
 const order_items_Schema = new Schema({
     user_id :{
@@ -74,4 +75,5 @@ const order_items_Schema = new Schema({
     {type:String}/// none,requested , accepted , denied
 },{timestamps:true})
 
-module.exports =model("Order_items", order_items_Schema);
+const Order_items = mongoose.model("Order_items", order_items_Schema);
+module.exports = Order_items;
