@@ -9,7 +9,7 @@ const { MakeRequest, getmodels, requesttryon } = require("./vrRoom.js");
 module.exports.getProductById = (req, res, next) => {
   try {
     Product.findById(req.parmas.id).then((product) => {
-      Rating.find({ product_id: req.parmas.id }).then(async (rate) => {
+      Rating.find({ _id: req.parmas.id }).then(async (rate) => {
         const linked_products = await Product.find({
           _id: { $in: product.linked_products },
         });
