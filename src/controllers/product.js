@@ -8,8 +8,8 @@ const { MakeRequest, getmodels, requesttryon } = require("./vrRoom.js");
 
 module.exports.getProductById = (req, res, next) => {
   try {
-    Product.findById(req.parmas.id).then((product) => {
-      Rating.find({ _id: req.parmas.id }).then(async (rate) => {
+    Product.findById(req.params.id).then((product) => {
+      Rating.find({ _id: req.params.id }).then(async (rate) => {
         const linked_products = await Product.find({
           _id: { $in: product.linked_products },
         });
@@ -32,7 +32,7 @@ module.exports.getProductById = (req, res, next) => {
 
 module.exports.getProductsBySupCategory = (req, res, next) => {
   try {
-    Product.find({ subCategory: req.parmas.id,view:true }).then((products) => {
+    Product.find({ subCategory: req.parmas.id, view: true }).then((products) => {
       return res.json({
         status: true,
         products: products,
@@ -48,9 +48,9 @@ module.exports.getProductsBySupCategory = (req, res, next) => {
 };
 
 module.exports.uplodaImage = async (req, res, next) => {
-  
+
   let images = [];
-  if (!req.files || req.files.length ===0) {
+  if (!req.files || req.files.length === 0) {
     return res.status(400).send("No file uploaded");
   }
   for (var i = 0; i < req.files.length; i++) {
@@ -230,9 +230,9 @@ module.exports.UpdateFirstVisitProduct = async (req, res) => {
 };
 module.exports.recomm = (req, res) => {
   Product.aggregate([
-      {$match:{ view:true,category_id:req.body.category_id}},
+    { $match: { view: true, category_id: req.body.category_id } },
     { $sample: { size: 8 } }
-  
+
   ])
     .then((response) => {
       res.json({
