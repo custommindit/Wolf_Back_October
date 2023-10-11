@@ -6,6 +6,7 @@ const brandsRouter = require("./api/brands")
 const mainCategoryRouter = require('./api/mainCategory')
 const subCategoryRouter = require('./api/subCategory')
 const productRouter = require('./api/product')
+const rateRouter = require('./api/rating')
 
 const router = Router()
 
@@ -16,5 +17,6 @@ router.use('/brands', brandsRouter)
 router.use('/main_category', mainCategoryRouter)
 router.use('/subcategory', subCategoryRouter)
 router.use('/product', productRouter)
+router.use('/rate', rateRouter)
 
 module.exports = router
