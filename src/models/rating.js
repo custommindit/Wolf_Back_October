@@ -14,7 +14,7 @@ const RatingSchema = new Schema({
     rate: {
         type: Number
     },
-    addres_rate: {
+    address_rate: {
         type: String
     },
     text_rate: {

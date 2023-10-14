@@ -9,14 +9,23 @@ const { MakeRequest, getmodels, requesttryon } = require("./vrRoom.js");
 module.exports.getProductById = (req, res, next) => {
   try {
     Product.findById(req.params.id).then((product) => {
-      Rating.find({ product_id: req.params.id }).then(async (rate) => {
+      Rating.find({ product_id: req.params.id }).then(async (rates) => {
         const linked_products = await Product.find({
           _id: { $in: product.linked_products },
         });
+        let total = 0;
+        let totalRate = 0;
+        if (rates.length > 0) {
+          rates.forEach(rate => {
+            total = total + rate.rate;
+          })
+          totalRate = total / rates.length
+        }
         return res.json({
           status: true,
           product: product,
-          rate: rate,
+          rates: rates,
+          totalRate: totalRate,
           linked_products: linked_products,
         });
       });

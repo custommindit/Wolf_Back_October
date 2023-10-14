@@ -9,7 +9,7 @@ module.exports.createRate = (req, res, next) => {
             user_id: body.decoded.id,
             user_name: body.decoded.name,
             rate: body.rate,
-            addres_rate: body.addres_rate,
+            address_rate: body.address_rate,
             text_rate: body.text_rate,
         })
 
