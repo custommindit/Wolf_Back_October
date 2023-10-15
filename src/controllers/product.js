@@ -16,10 +16,10 @@ module.exports.getProductById = (req, res, next) => {
         let total = 0;
         let totalRate = 0;
         if (rates.length > 0) {
-          rates.forEach(rate => {
+          rates.forEach((rate) => {
             total = total + rate.rate;
-          })
-          totalRate = total / rates.length
+          });
+          totalRate = total / rates.length;
         }
         return res.json({
           status: true,
@@ -41,12 +41,14 @@ module.exports.getProductById = (req, res, next) => {
 
 module.exports.getProductsBySupCategory = (req, res, next) => {
   try {
-    Product.find({ subCategory: req.parmas.id, view: true }).then((products) => {
-      return res.json({
-        status: true,
-        products: products,
-      });
-    });
+    Product.find({ subCategory: req.parmas.id, view: true }).then(
+      (products) => {
+        return res.json({
+          status: true,
+          products: products,
+        });
+      }
+    );
   } catch (error) {
     console.log(error.message);
     return res.json({
@@ -57,7 +59,6 @@ module.exports.getProductsBySupCategory = (req, res, next) => {
 };
 
 module.exports.uplodaImage = async (req, res, next) => {
-
   let images = [];
   if (!req.files || req.files.length === 0) {
     return res.status(400).send("No file uploaded");
@@ -176,26 +177,31 @@ module.exports.uplodaImage = async (req, res, next) => {
 };
 
 module.exports.models = async (req, res) => {
-  await getmodels(req.body.gender).then(response => {
-    res.json({ default: JSON.parse(response).models[0], image: JSON.parse(response).model_files[0], response: JSON.parse(response) })
-  })
+  await getmodels(req.body.gender)
+    .then((response) => {
+      res.json({
+        default: JSON.parse(response).models[0],
+        image: JSON.parse(response).model_files[0],
+        response: JSON.parse(response),
+      });
+    })
     .catch((error) => {
       res.json({
         message: "An error Occured!",
-        error: error.message
+        error: error.message,
       });
     });
 };
 
-
 module.exports.tryon = async (req, res) => {
-  await requesttryon(req.body.garments, req.body.gender).then(response => {
-    return res.json({ tryon: JSON.parse(response) })
-  })
+  await requesttryon(req.body.garments, req.body.gender)
+    .then((response) => {
+      return res.json({ tryon: JSON.parse(response) });
+    })
     .catch((error) => {
       res.json({
         message: "An error Occured!",
-        error: error.message
+        error: error.message,
       });
     });
 };
@@ -240,8 +246,7 @@ module.exports.UpdateFirstVisitProduct = async (req, res) => {
 module.exports.recomm = (req, res) => {
   Product.aggregate([
     { $match: { view: true, category_id: req.body.category_id } },
-    { $sample: { size: 8 } }
-
+    { $sample: { size: 8 } },
   ])
     .then((response) => {
       res.json({
@@ -255,11 +260,10 @@ module.exports.recomm = (req, res) => {
     });
 };
 
-
 module.exports.SearchByName = (req, res) => {
   Product.find({
     name: { $regex: ".*" + req.body.query + ".*", $options: "i" },
-    view: true
+    view: true,
   })
     .limit(8)
     .then((response) => {
@@ -276,7 +280,7 @@ module.exports.SearchByName = (req, res) => {
 module.exports.SearchByNameBulk = (req, res) => {
   Product.find({
     name: { $regex: ".*" + req.body.query + ".*", $options: "i" },
-    view: true
+    view: true,
   })
     .then((response) => {
       res.json({
@@ -295,20 +299,19 @@ module.exports.cart = async (req, res) => {
   const products = [];
   for (var i = 0; i < ids.length; i++) {
     await Product.findById(ids[i])
-      .then(response => {
-        products.push(response)
+      .then((response) => {
+        products.push(response);
       })
-      .catch(error => {
+      .catch((error) => {
         res.json({
-          message: 'An error Occured!'
-        })
-      })
+          message: "An error Occured!",
+        });
+      });
   }
   if (products.length === ids.length) {
-    res.json({ response: products })
+    res.json({ response: products });
   }
 };
-
 
 module.exports.getProductBySubCategory2 = async (req, res) => {
   let _id = req.params.id;
@@ -355,4 +358,33 @@ module.exports.DeleteProduct = async (req, res) => {
     .catch((err) => {
       return res.json({ message: "Error" });
     });
+};
+
+
+module.exports.getHomeRecents= async (req, res) => {
+  try{
+  let id = req.params.id;
+  Product.find({ category_id: id })
+    .sort({ _id: -1 }) 
+    .limit(4).then((documents) => {
+        res.json({response:documents})
+    });
+  }catch(error){
+    res.json({response:[]})
+  }
+};
+
+module.exports.gethomesublist= async (req, res) => {
+  try{
+  let id = req.params.id;
+  if(id.length===24)
+  Product.find({ subCategory: id })
+    .sort({ _id: -1 }) 
+    .limit(4).then((documents) => {
+        res.json({response:documents})
+    });
+    else{res.json({response:[]})}
+  }catch(error){
+    res.json({response:[]})
+  }
 };

@@ -51,4 +51,8 @@ router.post('/getmodels',product_controller.models)
 router.post('/tryon',product_controller.tryon)
 router.post('/recomm',product_controller.recomm)
 
+router.get('/home_latest/:id',product_controller.getHomeRecents)
+
+router.get('/home_subcategory/:id',product_controller.gethomesublist)
+
 module.exports = router
