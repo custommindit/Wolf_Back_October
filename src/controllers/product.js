@@ -361,30 +361,47 @@ module.exports.DeleteProduct = async (req, res) => {
 };
 
 
-module.exports.getHomeRecents= async (req, res) => {
-  try{
-  let id = req.params.id;
-  Product.find({ category_id: id })
-    .sort({ _id: -1 }) 
-    .limit(4).then((documents) => {
-        res.json({response:documents})
-    });
-  }catch(error){
-    res.json({response:[]})
+module.exports.getHomeRecents = async (req, res) => {
+  try {
+    let id = req.params.id;
+    Product.find({ category_id: id })
+      .sort({ _id: -1 })
+      .limit(4).then(async (documents) => {
+        let rates1 = []
+        for (var i = 0; i < documents.length; i++) {
+          await Rating.find({ product_id: documents[i]._id }).then(async (rates) => {
+            let total = 0;
+            let totalRate = 0;
+            if (rates.length > 0) {
+              rates.forEach((rate) => {
+                total = total + rate.rate;
+              });
+              totalRate = total / rates.length;
+            }
+            rates1.push(totalRate)
+          });
+        }
+        return await res.json({
+          response: documents,
+          rates: rates1
+        })
+      });
+  } catch (error) {
+    res.json({ response: [] })
   }
 };
 
-module.exports.gethomesublist= async (req, res) => {
-  try{
-  let id = req.params.id;
-  if(id.length===24)
-  Product.find({ subCategory: id })
-    .sort({ _id: -1 }) 
-    .limit(4).then((documents) => {
-        res.json({response:documents})
-    });
-    else{res.json({response:[]})}
-  }catch(error){
-    res.json({response:[]})
+module.exports.gethomesublist = async (req, res) => {
+  try {
+    let id = req.params.id;
+    if (id.length === 24)
+      Product.find({ subCategory: id })
+        .sort({ _id: -1 })
+        .limit(4).then((documents) => {
+          res.json({ response: documents })
+        });
+    else { res.json({ response: [] }) }
+  } catch (error) {
+    res.json({ response: [] })
   }
 };
