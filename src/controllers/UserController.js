@@ -27,7 +27,7 @@ const signUp = async (req, res) => {
   try {
     const body = req.body;
     const isNewUser = await User.isThisEmailUse(body.email);
-    if (!isNewUser) {
+    if (isNewUser) {
       return res.json({
         success: false,
         message: "This email is already in use",
@@ -114,7 +114,7 @@ const login = async (req, res, next) => {
     var email = req.body.email;
     var password = req.body.password;
     const isNewUser = await User.isThisEmailUse(email);
-    if (isNewUser) {
+    if (!isNewUser) {
       return res.json({
         success: false,
         message: "Id or password is invalid",
@@ -191,7 +191,7 @@ const getall = async (req, res) => {
 const banUser = async (req, res) => {
   try {
     if (req.body.decoded.admin)
-      User.findByIdAndUpdate(req.params.id, {$set: {ban: true}}, {new: true})
+      User.findByIdAndUpdate(req.params.id, { $set: { ban: true } }, { new: true })
         .then((response) => {
           res.json({
             response,
@@ -214,7 +214,7 @@ const banUser = async (req, res) => {
 const unbanUser = async (req, res) => {
   try {
     if (req.body.decoded.admin)
-      User.findByIdAndUpdate(req.params.id, {$set: {ban: false}}, {new: true})
+      User.findByIdAndUpdate(req.params.id, { $set: { ban: false } }, { new: true })
         .then((response) => {
           res.json({
             response,
