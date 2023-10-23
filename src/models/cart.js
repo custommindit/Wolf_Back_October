@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const CartSchema = new Schema({
+const cartSchema = new Schema({
     user_id: {
         type: String,
     },
@@ -17,13 +17,12 @@ const CartSchema = new Schema({
     color: {
         type: String
     },
-    clothing: {
+    dressing: {
         type: Boolean
     }
-
 })
 
-CartSchema.statics.isThisCart = async function (product_id, user_id, size, color) {
+cartSchema.statics.isThisCart = async function (product_id, user_id, size, color) {
     if (!product_id) throw new Error('Invalid product_id')
     try {
         const product = await this.findOne({ product_id: product_id, user_id: user_id, size: size, color: color })
@@ -37,5 +36,5 @@ CartSchema.statics.isThisCart = async function (product_id, user_id, size, color
 }
 
 
-const Cart = mongoose.model("Cart", Cartschema);
+const Cart = mongoose.model("Cart", cartSchema);
 module.exports = Cart;
