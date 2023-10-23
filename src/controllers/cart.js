@@ -10,8 +10,6 @@ module.exports.Create_cart_item = async (req, res) => {
 
     const body = req.body
 
-    console.log(body);
-
     const isNewCart = await Cart.isThisCart(body.product_id, id, body.size, body.color)
     if (!isNewCart) {
         return res.json({
