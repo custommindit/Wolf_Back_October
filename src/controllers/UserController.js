@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const product = require("../models/product");
+const Rating = require("../models/rating");
 const bcrypt = require("bcrypt");
 const { hashSync, genSaltSync } = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -270,12 +271,10 @@ const view = async (req, res) => {
     if (!user) {
       return res.json({ success: false, message: "User not found" });
     }
-    console.log(req.body)
     const updatedViewed = [
       req.body.id,
       ...user.viewed.filter((id) => id !== req.body.id),
-    ].slice(0, 8);
-    console.log("here")
+    ].slice(0, 4);
     await User.findByIdAndUpdate(
       req.body.decoded.id,
       {
@@ -293,7 +292,6 @@ const view = async (req, res) => {
 const viewed = async (req, res) => {
   try {
     const user = await User.findById(req.body.decoded.id);
-
     if (!user) {
       return json({ success: false, message: "User not found" });
     } else {
@@ -304,9 +302,26 @@ const viewed = async (req, res) => {
           },
           view: true,
         })
-        .then((response) => {
-          res.json({
-            response,
+        .then(async (documents) => {
+          let rates1 = [];
+          for (var i = 0; i < documents.length; i++) {
+            await Rating.find({ product_id: documents[i]._id }).then(
+              async (rates) => {
+                let total = 0;
+                let totalRate = 0;
+                if (rates.length > 0) {
+                  rates.forEach((rate) => {
+                    total = total + rate.rate;
+                  });
+                  totalRate = total / rates.length;
+                }
+                rates1.push(totalRate);
+              }
+            );
+          }
+          return await res.json({
+            response: documents,
+            rates: rates1,
           });
         });
     }
@@ -321,7 +336,6 @@ const changepassword = async (req, res) => {
     if (req.body.password) {
       const salt = genSaltSync(10);
       const password = hashSync(req.body.password, salt);
-
       User.findByIdAndUpdate(id, { password: password }).then(() => {
         res.json({
           message: "Success",
