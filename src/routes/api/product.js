@@ -55,4 +55,9 @@ router.get('/home_latest/:id',product_controller.getHomeRecents)
 
 router.get('/home_subcategory/:id',product_controller.gethomesublist)
 
+router.post('/designatehotsale/:id',product_controller.hotSaleDesignateOne)
+router.post('/undesignatehotsale/:id',product_controller.hotSaleUndesignateOne)
+
+router.get('/hotsales/:id',product_controller.hotSaleByCategorey)
+
 module.exports = router

@@ -303,6 +303,7 @@ module.exports.SearchByNameBulk = (req, res) => {
 };
 
 module.exports.cart = async (req, res) => {
+  try {
   const ids = req.body.products;
   const products = [];
   for (var i = 0; i < ids.length; i++) {
@@ -317,8 +318,28 @@ module.exports.cart = async (req, res) => {
       });
   }
   if (products.length === ids.length) {
-    res.json({ response: products });
+    let rates1=[]
+    for (var i = 0; i < products.length; i++) {
+      await Rating.find({ product_id: products[i]._id }).then(
+        async (rates) => {
+          let total = 0;
+          let totalRate = 0;
+          if (rates.length > 0) {
+            rates.forEach((rate) => {
+              total = total + rate.rate;
+            });
+            totalRate = total / rates.length;
+          }
+          rates1.push(totalRate);
+        }
+      );
+    }
+
+    res.json({ response: products,rates:rates1 });
   }
+} catch (error) {
+  res.json({ response:[] })
+}
 };
 
 module.exports.getProductBySubCategory2 = async (req, res) => {
@@ -408,12 +429,28 @@ module.exports.gethomesublist = async (req, res) => {
       Product.find({ subCategory: id })
         .sort({ _id: -1 })
         .limit(4)
-        .then((documents) => {
-          res.json({ response: documents });
+        .then(async (documents) => {
+          let rates1 = [];
+          for (var i = 0; i < documents.length; i++) {
+            await Rating.find({ product_id: documents[i]._id }).then(
+              async (rates) => {
+                let total = 0;
+                let totalRate = 0;
+                if (rates.length > 0) {
+                  rates.forEach((rate) => {
+                    total = total + rate.rate;
+                  });
+                  totalRate = total / rates.length;
+                }
+                rates1.push(totalRate);
+              }
+            );
+          }
+          return await res.json({
+            response: documents,
+            rates: rates1,
+          });
         });
-    else {
-      res.json({ response: [] });
-    }
   } catch (error) {
     res.json({ response: [] });
   }
@@ -441,8 +478,10 @@ module.exports.hotSaleDesignateOne = async (req, res) => {
         product_id: to_designate._id,
       });
       newHotSale.save().then((response) => {
-        res.json({ message: "designated as a hot sale ", success: true });
-      });
+        return res.json({ message: "designated as a hot sale ", success: true });
+      }).catch(error=>{
+        return res.json({ message: "designaton failed, already exists", success: false });
+      })
     }
   } catch (error) {
     res.json({ message: "designaton failed", success: false });
@@ -454,11 +493,11 @@ module.exports.hotSaleUndesignateOne = async (req, res) => {
     if (req.params.id === "undefined" || req.params.id.length !== 24) {
       return res.json({
         status: false,
-        message: "No such category",
+        message: "No such unit",
       });
     } else {
-      HotSale.findByIdAndDelete(req.params.id).then((response) => {
-        res.json({ message: "complete ", success: true, response });
+      HotSale.findByIdAndDelete(req.params.id).then(( ) => {
+        res.json({ message: "complete ", success: true,  });
       });
     }
   } catch (error) {
@@ -468,10 +507,10 @@ module.exports.hotSaleUndesignateOne = async (req, res) => {
 
 module.exports.hotSaleByCategorey = async (req, res) => {
   try {
-    HotSale.find({ category_id: to_designate.category_id }).then((response) => {
+    HotSale.find({ category_id: req.params.id }).then((response) => {
       res.json({ message: "complete ", success: true, response });
     });
   } catch (error) {
-    res.json({ message: "Internal Server Error", success: false });
+    res.json({ message: "Internal Server Error", success: false ,response:[]});
   }
 };

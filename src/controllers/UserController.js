@@ -53,6 +53,7 @@ const signUp = async (req, res) => {
       last_name: body.last_name,
       telephone: body.telephone,
       ban: false,
+      viewed:[]
     });
     user.save().then((response) => {
       res.json({
@@ -269,12 +270,12 @@ const view = async (req, res) => {
     if (!user) {
       return res.json({ success: false, message: "User not found" });
     }
-
+    console.log(req.body)
     const updatedViewed = [
       req.body.id,
       ...user.viewed.filter((id) => id !== req.body.id),
     ].slice(0, 8);
-
+    console.log("here")
     await User.findByIdAndUpdate(
       req.body.decoded.id,
       {
