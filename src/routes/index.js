@@ -9,6 +9,7 @@ const productRouter = require('./api/product')
 const rateRouter = require('./api/rating')
 const userRouter = require('./api/UserRouter')
 const cartRouter = require('./api/cart')
+const wishRouter = require('./api/wish')
 
 const router = Router()
 
@@ -22,5 +23,6 @@ router.use('/product', productRouter)
 router.use('/rate', rateRouter)
 router.use('/user', userRouter)
 router.use('/cart', cartRouter)
+router.use('/wish', wishRouter)
 
 module.exports = router

@@ -57,7 +57,7 @@ module.exports.Delete_cart_item = async (req, res) => {
         }
     })
 
-    await Cart.findOneAndDelete({ _id: id, user_id: req.body.decoded.id }).then(e => {
+    await Cart.findByIdAndDelete(id).then(e => {
         return res.status(200).json(e)
     }).catch(err => {
         console.log(err.message)
@@ -74,7 +74,7 @@ module.exports.add_one_quantity = async (req, res) => {
     })
     await Cart.findById(id).then(cart => {
         Product.findById(cart.product_id).then(async (product) => {
-            await Cart.findOndAndUpdate({ _id: id, quantity: { $lt: product.quantity[cart.size] } }, { $inc: { quantity: 1 } }, { new: true }).then(e => {
+            await Cart.findOneAndUpdate({ _id: id, quantity: { $lt: product.quantity[cart.size] } }, { $inc: { quantity: 1 } }, { new: true }).then(e => {
                 return res.status(200).json(e)
             }).catch(err => {
                 console.log(err.message)
