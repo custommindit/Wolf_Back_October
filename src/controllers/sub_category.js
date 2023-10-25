@@ -98,3 +98,11 @@ module.exports.UpdateViewSubcategory = async (req, res) => {
         return res.json({ message: "Error" })
     })
 }
+
+module.exports.gettotalcount = async (req, res) => {
+    await Product.count({ subCategory: req.params.id }).then(e => {  
+        return res.json({ success: false,count:e })
+    }).catch(err => {
+        return res.json({ success: false,count:0 })
+    })
+}
