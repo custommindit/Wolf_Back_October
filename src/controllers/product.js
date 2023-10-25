@@ -344,7 +344,7 @@ module.exports.cart = async (req, res) => {
 
 module.exports.getProductBySubCategory2 = async (req, res) => {
   let _id = req.params.id;
-  await Product.find({ subCategory: _id })
+  await Product.find({ subCategory: _id,view:true })
     .then((e) => {
       return res.json({
         response: e,
