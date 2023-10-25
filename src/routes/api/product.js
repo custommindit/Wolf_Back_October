@@ -33,7 +33,7 @@ router.post('/upload', upload.array('images'), product_controller.uplodaImage);
 
 router.get('/:id', product_controller.getProductById)
 
-router.get('/category2/:id', product_controller.getProductBySubCategory2)
+router.get('/category2/:id/:page', product_controller.getProductBySubCategory2)
 router.get('/main_category/:id', product_controller.getProductByMainCategory)
 router.get('/first_visit/:id', product_controller.getProductFirstVisit)
 router.put('/update_first_visit/:id', product_controller.UpdateFirstVisitProduct)
@@ -59,5 +59,7 @@ router.post('/designatehotsale/:id',product_controller.hotSaleDesignateOne)
 router.post('/undesignatehotsale/:id',product_controller.hotSaleUndesignateOne)
 
 router.get('/hotsales/:id',product_controller.hotSaleByCategorey)
+
+router.post('/category2filter/:id/:page', product_controller.getProductBySubCategory2filter)
 
 module.exports = router
