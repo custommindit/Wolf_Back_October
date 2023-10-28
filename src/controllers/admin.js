@@ -78,6 +78,7 @@ const signUp = async (req, res) => {
         })
     }
 }
+
 const auth = async (req, res) => {
     try{
         if(req.body.decoded.admin){

@@ -30,7 +30,7 @@ module.exports.createAddress = (req, res, next) => {
 
 module.exports.getAddesses = (req, res, next) => {
     try {
-        Rating.find({ user_id: req.body.decoded.id }).then(response => {
+        Address.find({ user_id: req.body.decoded.id }).then(response => {
             res.json({
                 status: true,
                 response: response
