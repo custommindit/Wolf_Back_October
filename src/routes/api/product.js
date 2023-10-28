@@ -62,4 +62,6 @@ router.get('/hotsales/:id',product_controller.hotSaleByCategorey)
 
 router.post('/category2filter/:id/:page', product_controller.getProductBySubCategory2filter)
 
+
+router.post('/test', product_controller.salepercent)
 module.exports = router
