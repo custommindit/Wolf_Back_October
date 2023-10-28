@@ -304,23 +304,61 @@ module.exports.SearchByNameBulk = (req, res) => {
 
 module.exports.cart = async (req, res) => {
   try {
-  const ids = req.body.products;
-  const products = [];
-  for (var i = 0; i < ids.length; i++) {
-    await Product.findById(ids[i])
-      .then((response) => {
-        products.push(response);
-      })
-      .catch((error) => {
-        res.json({
-          message: "An error Occured!",
+    const ids = req.body.products;
+    const products = [];
+    for (var i = 0; i < ids.length; i++) {
+      await Product.findById(ids[i])
+        .then((response) => {
+          products.push(response);
+        })
+        .catch((error) => {
+          res.json({
+            message: "An error Occured!",
+          });
         });
-      });
+    }
+    if (products.length === ids.length) {
+      let rates1 = [];
+      for (var i = 0; i < products.length; i++) {
+        await Rating.find({ product_id: products[i]._id }).then(
+          async (rates) => {
+            let total = 0;
+            let totalRate = 0;
+            if (rates.length > 0) {
+              rates.forEach((rate) => {
+                total = total + rate.rate;
+              });
+              totalRate = total / rates.length;
+            }
+            rates1.push(totalRate);
+          }
+        );
+      }
+
+      res.json({ response: products, rates: rates1 });
+    }
+  } catch (error) {
+    res.json({ response: [] });
   }
-  if (products.length === ids.length) {
-    let rates1=[]
-    for (var i = 0; i < products.length; i++) {
-      await Rating.find({ product_id: products[i]._id }).then(
+};
+
+module.exports.getProductBySubCategory2 = async (req, res) => {
+  let _id = req.params.id;
+  const perPage = 12;
+  const query = {
+    subCategory: _id,
+    view: true,
+  };
+
+  const options = {
+    skip: (req.params.page - 1) * perPage,
+    limit: perPage,
+  };
+  await Product.find(query, null, options)
+  .then(async (e) => {
+    let rates1 = [];
+    for (var i = 0; i < e.length; i++) {
+      await Rating.find({ product_id: e[i]._id }).then(
         async (rates) => {
           let total = 0;
           let totalRate = 0;
@@ -334,22 +372,11 @@ module.exports.cart = async (req, res) => {
         }
       );
     }
-
-    res.json({ response: products,rates:rates1 });
-  }
-} catch (error) {
-  res.json({ response:[] })
-}
-};
-
-module.exports.getProductBySubCategory2 = async (req, res) => {
-  let _id = req.params.id;
-  await Product.find({ subCategory: _id,view:true })
-    .then((e) => {
-      return res.json({
-        response: e,
-      });
-    })
+    return res.json({
+      response: e,
+      rates: rates1,
+    });
+  })
     .catch((err) => {
       return res.json({ message: err.message });
     });
@@ -477,11 +504,20 @@ module.exports.hotSaleDesignateOne = async (req, res) => {
         category_id: to_designate.category_id,
         product_id: to_designate._id,
       });
-      newHotSale.save().then((response) => {
-        return res.json({ message: "designated as a hot sale ", success: true });
-      }).catch(error=>{
-        return res.json({ message: "designaton failed, already exists", success: false });
-      })
+      newHotSale
+        .save()
+        .then((response) => {
+          return res.json({
+            message: "designated as a hot sale ",
+            success: true,
+          });
+        })
+        .catch((error) => {
+          return res.json({
+            message: "designaton failed, already exists",
+            success: false,
+          });
+        });
     }
   } catch (error) {
     res.json({ message: "designaton failed", success: false });
@@ -496,8 +532,8 @@ module.exports.hotSaleUndesignateOne = async (req, res) => {
         message: "No such unit",
       });
     } else {
-      HotSale.findByIdAndDelete(req.params.id).then(( ) => {
-        res.json({ message: "complete ", success: true,  });
+      HotSale.findByIdAndDelete(req.params.id).then(() => {
+        res.json({ message: "complete ", success: true });
       });
     }
   } catch (error) {
@@ -511,6 +547,56 @@ module.exports.hotSaleByCategorey = async (req, res) => {
       res.json({ message: "complete ", success: true, response });
     });
   } catch (error) {
-    res.json({ message: "Internal Server Error", success: false ,response:[]});
+    res.json({
+      message: "Internal Server Error",
+      success: false,
+      response: [],
+    });
   }
+};
+
+module.exports.getProductBySubCategory2filter = async (req, res) => {
+  let _id = req.params.id;
+  const body = req.body;
+  const perPage = 12;
+  const query = {
+    subCategory: _id,
+    view: true,
+  };
+  if (body.maxprice) {
+    query.price_after = { $lte: body.maxprice };
+  }
+  if (body.minprice) {
+    query.price_after = { $lte: body.minprice };
+  }
+  const options = {
+    skip: (req.params.page - 1) * perPage,
+    limit: perPage,
+  };
+  await Product.find(query, null, options)
+    .then(async (e) => {
+      let rates1 = [];
+      for (var i = 0; i < e.length; i++) {
+        await Rating.find({ product_id: e[i]._id }).then(
+          async (rates) => {
+            let total = 0;
+            let totalRate = 0;
+            if (rates.length > 0) {
+              rates.forEach((rate) => {
+                total = total + rate.rate;
+              });
+              totalRate = total / rates.length;
+            }
+            rates1.push(totalRate);
+          }
+        );
+      }
+      return res.json({
+        response: e,
+        rates: rates1,
+      });
+    })
+    .catch((err) => {
+      return res.json({ message: err.message });
+    });
 };
