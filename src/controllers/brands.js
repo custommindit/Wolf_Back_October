@@ -1,4 +1,5 @@
 const Brand = require("../models/brands");
+const Product = require("../models/product");
 
 module.exports.Allbrands = (req, res) => {
   Brand.find()
@@ -18,9 +19,17 @@ module.exports.bysubcategory = (req, res) => {
   Brand.find({
     sub_category: req.params.sub_category,
   })
-    .then((response) => {
+    .then(async(response) => {
+      numbers=[]
+      if(response.length>0){
+        for (let index = 0; index < response.length; index++) {
+          const element = await Product.count({brand:response[index].name});
+          numbers.push(element)
+        }
+      }
       res.json({
         response,
+        counts:numbers
       });
     })
     .catch((error) => {

@@ -355,11 +355,10 @@ module.exports.getProductBySubCategory2 = async (req, res) => {
     limit: perPage,
   };
   await Product.find(query, null, options)
-  .then(async (e) => {
-    let rates1 = [];
-    for (var i = 0; i < e.length; i++) {
-      await Rating.find({ product_id: e[i]._id }).then(
-        async (rates) => {
+    .then(async (e) => {
+      let rates1 = [];
+      for (var i = 0; i < e.length; i++) {
+        await Rating.find({ product_id: e[i]._id }).then(async (rates) => {
           let total = 0;
           let totalRate = 0;
           if (rates.length > 0) {
@@ -369,14 +368,13 @@ module.exports.getProductBySubCategory2 = async (req, res) => {
             totalRate = total / rates.length;
           }
           rates1.push(totalRate);
-        }
-      );
-    }
-    return res.json({
-      response: e,
-      rates: rates1,
-    });
-  })
+        });
+      }
+      return res.json({
+        response: e,
+        rates: rates1,
+      });
+    })
     .catch((err) => {
       return res.json({ message: err.message });
     });
@@ -569,6 +567,10 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
   if (body.minprice) {
     query.price_after = { $lte: body.minprice };
   }
+  if (body.sizes) {
+    query.quantity = { $in: body.sizes };
+  }
+  console.log(query);
   const options = {
     skip: (req.params.page - 1) * perPage,
     limit: perPage,
@@ -577,19 +579,17 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
     .then(async (e) => {
       let rates1 = [];
       for (var i = 0; i < e.length; i++) {
-        await Rating.find({ product_id: e[i]._id }).then(
-          async (rates) => {
-            let total = 0;
-            let totalRate = 0;
-            if (rates.length > 0) {
-              rates.forEach((rate) => {
-                total = total + rate.rate;
-              });
-              totalRate = total / rates.length;
-            }
-            rates1.push(totalRate);
+        await Rating.find({ product_id: e[i]._id }).then(async (rates) => {
+          let total = 0;
+          let totalRate = 0;
+          if (rates.length > 0) {
+            rates.forEach((rate) => {
+              total = total + rate.rate;
+            });
+            totalRate = total / rates.length;
           }
-        );
+          rates1.push(totalRate);
+        });
       }
       return res.json({
         response: e,
@@ -599,4 +599,41 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
     .catch((err) => {
       return res.json({ message: err.message });
     });
+};
+
+module.exports.salepercent = async (req, res) => {
+  try {
+    Product.find({
+      $expr: {
+        $and: [
+          {
+            $gte: [
+              {
+                $multiply: [
+                  { $divide: ["$price_after", "$price_before"] },
+                  100,
+                ],
+              },
+              req.body.minpercent,
+            ],
+          },
+          {
+            $lte: [
+              {
+                $multiply: [
+                  { $divide: ["$price_after", "$price_before"] },
+                  100,
+                ],
+              },
+              req.body.maxpercent,
+            ],
+          },
+        ],
+      },
+    }).then((response) => {
+      res.json({ response });
+    });
+  } catch (error) {
+    res.json({ response: [] });
+  }
 };
