@@ -47,6 +47,16 @@ module.exports.getProductById = (req, res, next) => {
   }
 };
 
+module.exports.getProducts = (req, res, next) => {
+  Product.find({})
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+};
+
 module.exports.getProductsBySupCategory = (req, res, next) => {
   try {
     Product.find({ subCategory: req.parmas.id, view: true }).then(
