@@ -15,7 +15,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/upload", upload.array("images"), product_controller.uplodaImage);
+router.post("/uploadLocal", upload.array("images"), product_controller.uplodaImage);
+router.post("/uploadCloud", upload.array("images"), product_controller.uplodaImageCloud);
 
 const storage2 = multer.diskStorage({
   destination: function (req, file, cb) {
