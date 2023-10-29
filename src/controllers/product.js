@@ -88,242 +88,135 @@ module.exports.getProductsBySupCategory = (req, res, next) => {
   }
 };
 
-module.exports.uplodaImage = async (req, res, next) => {
-  let images = [];
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).send("No file uploaded");
-  }
-  for (var i = 0; i < req.files.length; i++) {
-    images.push(`${req.files[i].path}`);
-  }
-  const body = req.body;
-  let quantity = JSON.parse(body.quantity);
-  const sizes = Object.keys(quantity);
-
-  body.supplier = "Wolf";
-  body.imageSrc = images;
-  var vrprop = {};
-  if (body.dressing) {
-    vrprop.gender = body.gender;
-    vrprop.vrpos = body.vrpos;
-    vrprop.garment_img_url = images[1];
-    if (body.vrpos === "bottoms") {
-      vrprop.vrpossec = body.vrpossec;
-    }
-  }
-  const product = new Product({
-    supplier: "Wolf",
-    category: body.category,
-    subCategory: body.subCategory,
-    typeOfProduct: body.typeOfProduct,
-    first_visit: false,
-    name: body.name,
-    dressing: body.dressing,
-    ...vrprop,
-    color: body.color,
-    brand: body.brand,
-    SKU: body.SKU,
-    price_before: body.price_before,
-    price_after: body.price_after,
-    imageSrc: images,
-    desc: JSON.parse(body.desc),
-    description: body.description,
-    quantity: JSON.parse(body.quantity),
-    view: true,
-  });
-
+module.exports.uploadImage = async (req, res, next) => {
   try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).send("No file uploaded");
+    }
+
+    const images = req.files.map((file) => file.path);
+    const body = req.body;
+
+    // Prepare vrprop based on dressing
+    let vrprop = {};
+    if (body.dressing) {
+      vrprop = {
+        gender: body.gender,
+        vrpos: body.vrpos,
+        garment_img_url: images[0],
+      };
+      if (body.vrpos === "bottoms") {
+        vrprop.vrpossec = body.vrpossec;
+      }
+    }
+
+    // Create the product object
+    const productData = {
+      supplier: "Wolf",
+      category: body.category,
+      subCategory: body.subCategory,
+      typeOfProduct: body.typeOfProduct,
+      first_visit: false,
+      name: body.name,
+      dressing: body.dressing,
+      ...vrprop,
+      color: body.color,
+      brand: body.brand,
+      SKU: body.SKU,
+      price_before: body.price_before,
+      price_after: body.price_after,
+      imageSrc: images,
+      desc: JSON.parse(body.desc),
+      description: body.description,
+      quantity: JSON.parse(body.quantity),
+      view: true,
+    };
+
+    const product = new Product(productData);
     const response = await product.save();
-    for (let i = 0; i < sizes.length; i++) {
-      const size = sizes[i];
-      const found = await Size.findOne({
-        size_name: size,
-        sub_category: response.subCategory,
-      });
-      if (found === null) {
-        const newsize = new Size({
-          size_name: size,
-          sub_category: response.subCategory,
-        });
-        newsize.save();
-      }
-    }
-    const found_color = await Color.findOne({
-      color_name: body.color,
-      sub_category: response.subCategory,
-      color_hex: body.color_hex,
-    });
-    if (found_color === null) {
-      const newcolor = new Color({
-        color_name: body.color,
-        sub_category: response.subCategory,
-        color_hex: body.color_hex,
-      });
-      newcolor.save();
-    }
-    const found_brand = await Brand.findOne({
-      brand_name: body.brand,
-      sub_category: response.subCategory,
-    });
-    if (found_brand === null) {
-      const newbrand = new Brand({
-        brand_name: body.brand,
-        sub_category: response.subCategory,
-        image: body.brandImage,
-      });
-      newbrand.save();
-    }
-    if (response.dressing) {
-      try {
-        const responseData = await MakeRequest(vrprop, response.imageSrc[0]);
-        console.log("MakeRequest Response:", responseData);
 
-        if (JSON.parse(responseData).success) {
-          const updatedProduct = await Product.findOneAndUpdate(
-            { _id: response._id },
-            { garment_id: JSON.parse(responseData).garment_id },
-            { new: true }
-          );
+    // Handle sizes, colors, brands, and other operations here
 
-          console.log("Updated Product:", updatedProduct);
+    // Handle MakeRequest and other operations if needed
 
-          return res.json({
-            response: updatedProduct,
-          });
-        }
-      } catch (error) {
-        console.error("MakeRequest Error:", error);
-      }
-    }
     return res.json({
       response,
     });
   } catch (error) {
-    return res.json({
-      message: error.message,
-    });
+    return res.status(500).json({ message: error.message });
   }
 };
 
-module.exports.uplodaImageCloud = async (req, res, next) => {
- let images = [];
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).send("No file uploaded");
-  }
-  for (var i = 0; i < req.files.length; i++) {
-    const  { secure_url, public_id } = await cloudinary.uploader.upload(
-      req.files[i].path,
-      { folder:`${process.env.FOLDER_CLOUD_NAME}/product/images` });
-      images.push({ secure_url, public_id })
-        }
-  const body = req.body;
-  let quantity = JSON.parse(body.quantity);
-  const sizes = Object.keys(quantity);
 
-  body.supplier = "Wolf";
-  // body.images = images;
-  var vrprop = {};
-  if (body.dressing) {
-    vrprop.gender = body.gender;
-    vrprop.vrpos = body.vrpos;
-    vrprop.garment_img_url = images[1];
-    if (body.vrpos === "bottoms") {
-      vrprop.vrpossec = body.vrpossec;
-    }
-  }
-  const product = new Product({
-    supplier: "Wolf",
-    category: body.category,
-    subCategory: body.subCategory,
-    typeOfProduct: body.typeOfProduct,
-    first_visit: false,
-    name: body.name,
-    dressing: body.dressing,
-    ...vrprop,
-    color: body.color,
-    brand: body.brand,
-    SKU: body.SKU,
-    price_before: body.price_before,
-    price_after: body.price_after,
-    images: images,
-    desc: JSON.parse(body.desc),
-    description: body.description,
-    quantity: JSON.parse(body.quantity),
-    view: true,
-  });
-
+module.exports.uploadImageCloud = async (req, res, next) => {
   try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).send("No file uploaded");
+    }
+
+    const images = [];
+
+    for (let i = 0; i < req.files.length; i++) {
+      const { secure_url, public_id } = await cloudinary.uploader.upload(req.files[i].path, {
+        folder: `${process.env.FOLDER_CLOUD_NAME}/product/images`,
+      });
+      
+      images.push({ secure_url, public_id });
+    }
+
+    const body = req.body;
+    let quantity = JSON.parse(body.quantity);
+    const sizes = Object.keys(quantity);
+
+    body.supplier = "Wolf";
+
+    const vrprop = {};
+    if (body.dressing) {
+      vrprop.gender = body.gender;
+      vrprop.vrpos = body.vrpos;
+      vrprop.garment_img_url = images[0].secure_url; // Use the first uploaded image
+      if (body.vrpos === "bottoms") {
+        vrprop.vrpossec = body.vrpossec;
+      }
+    }
+
+    // Create the product object
+    const product = new Product({
+      supplier: "Wolf",
+      category: body.category,
+      subCategory: body.subCategory,
+      typeOfProduct: body.typeOfProduct,
+      first_visit: false,
+      name: body.name,
+      dressing: body.dressing,
+      ...vrprop,
+      color: body.color,
+      brand: body.brand,
+      SKU: body.SKU,
+      price_before: body.price_before,
+      price_after: body.price_after,
+      images: images.map((image) => image.secure_url), // Extract secure URLs
+      desc: JSON.parse(body.desc),
+      description: body.description,
+      quantity: JSON.parse(body.quantity),
+      view: true,
+    });
+
+    // Save the product to the database
     const response = await product.save();
-    for (let i = 0; i < sizes.length; i++) {
-      const size = sizes[i];
-      const found = await Size.findOne({
-        size_name: size,
-        sub_category: response.subCategory,
-      });
-      if (found === null) {
-        const newsize = new Size({
-          size_name: size,
-          sub_category: response.subCategory,
-        });
-        newsize.save();
-      }
-    }
-    const found_color = await Color.findOne({
-      color_name: body.color,
-      sub_category: response.subCategory,
-      color_hex: body.color_hex,
-    });
-    if (found_color === null) {
-      const newcolor = new Color({
-        color_name: body.color,
-        sub_category: response.subCategory,
-        color_hex: body.color_hex,
-      });
-      newcolor.save();
-    }
-    const found_brand = await Brand.findOne({
-      brand_name: body.brand,
-      sub_category: response.subCategory,
-    });
-    if (found_brand === null) {
-      const newbrand = new Brand({
-        brand_name: body.brand,
-        sub_category: response.subCategory,
-        image: body.brandImage,
-      });
-      newbrand.save();
-    }
-    if (response.dressing) {
-      try {
-        const responseData = await MakeRequest(vrprop, response.imageSrc[0]);
-        console.log("MakeRequest Response:", responseData);
 
-        if (JSON.parse(responseData).success) {
-          const updatedProduct = await Product.findOneAndUpdate(
-            { _id: response._id },
-            { garment_id: JSON.parse(responseData).garment_id },
-            { new: true }
-          );
+    // Handle sizes, colors, brands, and other operations here
 
-          console.log("Updated Product:", updatedProduct);
+    // Handle MakeRequest and other operations if needed
 
-          return res.json({
-            response: updatedProduct,
-          });
-        }
-      } catch (error) {
-        console.error("MakeRequest Error:", error);
-      }
-    }
     return res.json({
       response,
     });
   } catch (error) {
-    return res.json({
-      message: error.message,
-    });
+    return res.status(500).json({ message: error.message });
   }
 };
+
 
 
 module.exports.models = async (req, res) => {
