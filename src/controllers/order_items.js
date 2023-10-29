@@ -8,30 +8,28 @@ require("dotenv").config();
 
 module.exports.Create_order_item = async (req, res) => {
   const body = req.body;
-
+  
   let list = [];
   let suppliers = [];
 
-  for (var i = 0; i < body.products.length; i++) {
-    await Product.findById(body.products[i].product_id).then(
+  for (var i = 0; i < body.cartItems.length; i++) {
+
+    await Product.findById(body.cartItems[i].product_id).then(
       async (product) => {
-        if (body.products[i].clothing) {
           var quantity = product.quantity;
-            quantity[body.products[i].size] =
-              quantity[body.products[i].size] - body.products[i].quantity;
-          
-        }
-        body.products[i].image = product.imageSrc[0];
-        body.products[i].SKU = product.SKU;
-        body.products[i].name = product.name;
+            quantity[body.cartItems[i].size] =
+              quantity[body.cartItems[i].size] - body.cartItems[i].quantity;
+        body.cartItems[i].image = product.imageSrc[0];
+        body.cartItems[i].SKU = product.SKU;
+        body.cartItems[i].name = product.name;
         if (!suppliers.includes(product.supplier)) {
           suppliers.push(product.supplier);
         }
-          await Product.findByIdAndUpdate(body.products[i].product_id, {
+          await Product.findByIdAndUpdate(body.cartItems[i].product_id, {
             $set: { quantity: quantity },
           }).then(async (product1) => {
             await Cart.findOneAndDelete({
-              product_id: body.products[i].product_id,
+              product_id: body.cartItems[i].product_id,
               user_id: req.body.decoded.id,
             }).then((e) => {
               list.push("Done");
@@ -42,15 +40,15 @@ module.exports.Create_order_item = async (req, res) => {
     );
   }
 
-  if (list.length === body.products.length) {
+  if (list.length === body.cartItems.length) {
     await add_order_item(body, req.body.decoded.id, suppliers, req.body.decoded.email)
       .then((e) => {
-        emailController.sendMail(
-          req.body.decoded.email,
-          e.firstName,
-          e._id,
-          e.totalPrice
-        );
+        // emailController.sendMail(
+        //   req.body.decoded.email,
+        //   e.firstName,
+        //   e._id,
+        //   e.totalPrice
+        //);
         return res.status(200).json(e);
       })
       .catch((err) => {
@@ -65,7 +63,7 @@ const add_order_item = async (body, id, suppliers, email) => {
   const newOrder_item = new Order_items({
     user_id: id,
     email: email,
-    products: body.products,
+    products: body.cartItems,
     phone: body.phone,
     country: body.country,
     firstName: body.firstName,

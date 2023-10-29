@@ -10,7 +10,7 @@ const viewProfile = (req, res, next) => {
   try {
     const id = req.body.decoded.id;
 
-    User.findById(id).then((response) => {
+    User.findById(id).select("-password").then((response) => {
       res.json({
         response,
         success: true,
@@ -53,6 +53,7 @@ const signUp = async (req, res) => {
       first_name: body.first_name,
       last_name: body.last_name,
       telephone: body.telephone,
+      gender:"",
       ban: false,
       viewed:[]
     });
@@ -80,7 +81,7 @@ const updateProfile = async (req, res) => {
       last_name: body.last_name,
       telephone: body.telephone,
     };
-    User.findByIdAndUpdate(id, { $set: update }).then(() => {
+    User.findByIdAndUpdate(id,  update ).then(() => {
       res.json({
         success: true,
         message: "User updated successfully",
@@ -333,7 +334,8 @@ const viewed = async (req, res) => {
 const changepassword = async (req, res) => {
   try {
     const id = req.body.decoded.id;
-    if (req.body.password) {
+
+    if (req.body.password===req.body.cPassword && req.body.password) {
       const salt = genSaltSync(10);
       const password = hashSync(req.body.password, salt);
       User.findByIdAndUpdate(id, { password: password }).then(() => {
@@ -341,6 +343,8 @@ const changepassword = async (req, res) => {
           message: "Success",
         });
       });
+    }else{
+      res.status(200).json({ message: "password doesnt match comfirm password" });
     }
   } catch (error) {
     console.error("Error updating document:", error);
