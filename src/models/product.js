@@ -6,12 +6,14 @@ const productSchema = new Schema(
     supplier: {
       type: String,
     },
-    category_id: {
-      type: String,
+    category: {
+      type:mongoose.Types.ObjectId,
+      ref:'MainCategory',
     },
     subCategory: {
-      type: String,
-      index: true,
+      type:mongoose.Types.ObjectId,
+      ref:'SubCategory',
+      // index: true,
     },
     first_visit: {
       type: Boolean,
@@ -33,8 +35,10 @@ const productSchema = new Schema(
       default: 0,
     },
     images: {
-      type: Array,
-      default: [],
+      type:Array,
+      required:true,
+      public_id:String,
+      secure_url:String
     },
     desc: {
       type: Object,
