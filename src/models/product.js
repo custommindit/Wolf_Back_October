@@ -7,11 +7,13 @@ const productSchema = new Schema(
       type: String,
     },
     category_id: {
-      type: String,
+      type:mongoose.Types.ObjectId,
+      ref:'MainCategory',
     },
     subCategory: {
-      type: String,
-      index: true,
+      type:mongoose.Types.ObjectId,
+      ref:'SubCategory',
+      // index: true,
     },
     first_visit: {
       type: Boolean,
