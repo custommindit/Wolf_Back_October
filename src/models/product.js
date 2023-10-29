@@ -6,7 +6,7 @@ const productSchema = new Schema(
     supplier: {
       type: String,
     },
-    category_id: {
+    category: {
       type:mongoose.Types.ObjectId,
       ref:'MainCategory',
     },
