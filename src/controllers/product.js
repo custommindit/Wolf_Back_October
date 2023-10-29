@@ -48,7 +48,14 @@ module.exports.getProductById = (req, res, next) => {
 };
 
 module.exports.getProducts = (req, res, next) => {
-  Product.find({})
+  Product.find({}).populate(
+    {
+    path:'category_id',
+    }).populate(
+    {
+    path:'subCategory',
+    },
+      )
     .then((result) => {
       res.status(200).send(result);
     })
