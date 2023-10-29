@@ -35,8 +35,10 @@ const productSchema = new Schema(
       default: 0,
     },
     images: {
-      type: Array,
-      default: [],
+      type:Array,
+      required:true,
+      public_id:String,
+      secure_url:String
     },
     desc: {
       type: Object,
