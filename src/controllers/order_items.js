@@ -3,7 +3,7 @@ const Cart = require("../models/cart");
 const Product = require("../models/product.js");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
-const emailController = require("./ordermail");
+// const emailController = require("./ordermail");
 require("dotenv").config();
 
 module.exports.Create_order_item = async (req, res) => {
@@ -19,15 +19,14 @@ module.exports.Create_order_item = async (req, res) => {
           var quantity = product.quantity;
             quantity[body.cartItems[i].size] =
               quantity[body.cartItems[i].size] - body.cartItems[i].quantity;
-        body.cartItems[i].image = product.imageSrc[0];
+        body.cartItems[i].image = product.images[0];
         body.cartItems[i].SKU = product.SKU;
         body.cartItems[i].name = product.name;
         if (!suppliers.includes(product.supplier)) {
           suppliers.push(product.supplier);
         }
-          await Product.findByIdAndUpdate(body.cartItems[i].product_id, {
-            $set: { quantity: quantity },
-          }).then(async (product1) => {
+          await Product.findByIdAndUpdate(body.cartItems[i].product_id, { quantity }
+          ).then(async (product1) => {
             await Cart.findOneAndDelete({
               product_id: body.cartItems[i].product_id,
               user_id: req.body.decoded.id,
@@ -58,6 +57,10 @@ module.exports.Create_order_item = async (req, res) => {
   }
 };
 
+
+
+
+
 const add_order_item = async (body, id, suppliers, email) => {
 
   const newOrder_item = new Order_items({
@@ -66,8 +69,7 @@ const add_order_item = async (body, id, suppliers, email) => {
     products: body.cartItems,
     phone: body.phone,
     country: body.country,
-    firstName: body.firstName,
-    lastName: body.lastName,
+    name: body.name,
     address: body.address,
     city: body.city,
     zipCode: body.zipCode,
@@ -80,6 +82,9 @@ const add_order_item = async (body, id, suppliers, email) => {
   await newOrder_item.save();
   return newOrder_item;
 };
+
+
+
 
 module.exports.Read_order_items = async (req, res) => {
   await Order_items.find({ returnrequest: "none" })

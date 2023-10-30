@@ -10,6 +10,8 @@ const rateRouter = require("./api/rating");
 const userRouter = require("./api/UserRouter");
 const cartRouter = require("./api/cart");
 const wishRouter = require("./api/wish");
+const orderRouter = require("./api/order_items");
+
 
 const router = Router();
 
@@ -24,5 +26,7 @@ router.use("/rate", rateRouter);
 router.use("/user", userRouter);
 router.use("/cart", cartRouter);
 router.use("/wish", wishRouter);
+router.use("/order", orderRouter);
+
 
 module.exports = router;
