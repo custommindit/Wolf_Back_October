@@ -61,18 +61,15 @@ const order_items_Schema = new Schema({
     totalPrice: {
         type: String
     },
-  /*  status:{
+   status:{
         type:String
     },///processing,shipping/completed
-    moved to status per supplier
-    */
     suppliers:
-    [{
-        supplier:String,
-        status:String
-    }],
-    returnrequest:
-    {type:String}/// none,requested , accepted , denied
+    [
+    String,
+        
+    ],
+    returnrequest:{type:String}/// none,requested , accepted , denied
 },{timestamps:true})
 
 const Order_items = mongoose.model("Order_items", order_items_Schema);
