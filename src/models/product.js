@@ -53,7 +53,7 @@ const productSchema = new Schema(
     quantity: {
       type: Object,
       default: {
-        OS: 0,
+        OS: 0,//only size
       },
     },
     dressing: {
