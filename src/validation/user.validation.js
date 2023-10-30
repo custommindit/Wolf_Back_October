@@ -11,7 +11,7 @@ exports.sign_up = joi.object({
     first_name: globalValidationFields.name
 }).required();
 
-exports.login = joi.object({
+exports.Login = joi.object({
     email: globalValidationFields.email,
     password: globalValidationFields.password
 }).required();

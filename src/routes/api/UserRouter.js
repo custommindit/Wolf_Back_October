@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const { checkToken } = require("../../auth/token_validation");
 var validation = require("../../validation/main.validation.js").validation;
-var {sign_up} = require("../../validation/user.validation");
+var {sign_up, Login} = require("../../validation/user.validation");
 
 const {
   viewProfile,
@@ -20,7 +20,7 @@ router.post("/sign_up",validation(sign_up), signUp);
 router.post("/view", checkToken, view);
 router.get("/viewed", checkToken, viewed);
 router.post("/search", checkToken, search);
-router.post("/login", login);
+router.post("/login",validation(Login), login);
 router.patch("/update_profile", checkToken, updateProfile);
 router.delete("/delete_profile", checkToken, deleteProfile);
 router.patch("/update_password", checkToken, changepassword);
