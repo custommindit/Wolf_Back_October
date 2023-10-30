@@ -11,7 +11,7 @@ const order_items_Schema = new Schema({
     products:[
         {
             product_id: {
-                type: String
+                type: mongoose.Types.ObjectId
             },
             name: {
                 type: String
@@ -61,16 +61,11 @@ const order_items_Schema = new Schema({
     totalPrice: {
         type: String
     },
-  /*  status:{
+   status:{
         type:String
-    },///processing,shipping/completed
-    moved to status per supplier
-    */
-    suppliers:
-    [{
-        supplier:String,
-        status:String
-    }],
+    },
+    
+    suppliers:[String],
     returnrequest:
     {type:String}/// none,requested , accepted , denied
 },{timestamps:true})
