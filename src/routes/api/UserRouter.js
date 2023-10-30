@@ -11,7 +11,7 @@ const {
   login,
   getall,
   search,
-  view, viewed, changepassword
+  view, viewed, changepassword, softDeleteUser
 } = require("../../controllers/UserController");
 
 router.get("/view_profile", checkToken, viewProfile);
@@ -24,5 +24,6 @@ router.post("/login", login);
 router.patch("/update_profile", checkToken, updateProfile);
 router.delete("/delete_profile", checkToken, deleteProfile);
 router.patch("/update_password", checkToken, changepassword);
+router.patch("/softDelete", checkToken, softDeleteUser);
 
 module.exports = router;

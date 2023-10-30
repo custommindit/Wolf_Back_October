@@ -123,6 +123,16 @@ const login = async (req, res, next) => {
         message: "Id or password is invalid",
       });
     }
+///////////////////////////////////////////////////////////////////soft delete
+    // Check if the user is marked as deleted
+    const user = await User.findOne({ email: email });
+    if (user && user.isDeleted) {
+      return res.json({
+        success: false,
+        message: "User is marked as deleted. Login not allowed.",
+      });
+    }
+
     User.findOne({ $or: [{ email: email }, { password: password }] }).then(
       (user) => {
         if (user) {
@@ -352,6 +362,32 @@ const changepassword = async (req, res) => {
   }
 };
 
+
+const softDeleteUser = async (req, res) => {
+  try {
+    const userId = req.body.decoded.id; // Assuming you're passing the user ID in the URL parameters
+
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(200).json({ message: "User not found." });
+    }
+
+    // Soft delete the user by marking them as deleted
+    user.isDeleted = true;
+    user.deletedAt = new Date();
+
+    // Save the updated user document
+    await user.save();
+
+    res.json({ message: "User has been soft deleted." });
+  } catch (error) {
+    res.status(200).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
 module.exports = {
   viewProfile,
   signUp,
@@ -365,4 +401,5 @@ module.exports = {
   changepassword,
   banUser,
   unbanUser,
+  softDeleteUser
 };

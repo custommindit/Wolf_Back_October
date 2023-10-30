@@ -30,6 +30,8 @@ const userSchema = new Schema({
     ban: {
         type: Boolean
     },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
 }, { timeseries: true })
 
 userSchema.statics.isThisEmailUse = async function (email) {

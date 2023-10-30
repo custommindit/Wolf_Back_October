@@ -3,7 +3,7 @@ const Cart = require("../models/cart");
 const Product = require("../models/product.js");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
-const emailController = require("./ordermail");
+// const emailController = require("./ordermail");
 require("dotenv").config();
 
 module.exports.Create_order_item = async (req, res) => {
@@ -16,10 +16,10 @@ module.exports.Create_order_item = async (req, res) => {
 
     await Product.findById(body.cartItems[i].product_id).then(
       async (product) => {
-          var quantity = product.quantity;
-            quantity[body.cartItems[i].size] =
-              quantity[body.cartItems[i].size] - body.cartItems[i].quantity;
-        body.cartItems[i].image = product.imageSrc[0];
+        var quantity = product.quantity;
+        quantity[body.cartItems[i].size] =
+        quantity[body.cartItems[i].size] - body.cartItems[i].quantity;
+        body.cartItems[i].image = product.images[0];
         body.cartItems[i].SKU = product.SKU;
         body.cartItems[i].name = product.name;
         if (!suppliers.includes(product.supplier)) {
