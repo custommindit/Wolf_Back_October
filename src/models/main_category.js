@@ -8,6 +8,10 @@ const MainCategorySchema = new Schema({
     view: {
         type: Boolean
     }
+}
+, 
+{
+    timestamps:true
 })
 
 

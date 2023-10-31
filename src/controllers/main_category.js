@@ -3,9 +3,13 @@ const MainCategory = require('../models/main_category')
 
 module.exports.add_mainCategory = async (req, res) => {
     const { name, view } = req.body
+    const isCategoryExist = MainCategory.findOne({name})
+    if (isCategoryExist) {
+        return res.json({message:"this name is exist before enter another name"})
+    }
     const main_category = new MainCategory({ name: name, view: view })
     main_category.save().then(e => {
-        res.status(200).json(e)
+        return res.status(200).json({message:"Category Created Successfuly"})
     }).catch(err => {
         console.log(err.message)
         res.status(401).json({ error: err.message })
