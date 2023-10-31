@@ -3,7 +3,7 @@ const MainCategory = require('../models/main_category')
 
 module.exports.add_mainCategory = async (req, res) => {
     const { name, view } = req.body
-    const isCategoryExist = MainCategory.findOne({name})
+    const isCategoryExist = await MainCategory.findOne({name})
     if (isCategoryExist) {
         return res.json({message:"this name is exist before enter another name"})
     }
