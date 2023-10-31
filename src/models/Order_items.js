@@ -52,7 +52,7 @@ const order_items_Schema = new Schema({
     city: {
         type: String,
     },
-    housenumber: {
+    house: {
         type: Number,
     },
     payment: {
