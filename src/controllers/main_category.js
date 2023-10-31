@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const MainCategory = require('../models/main_category')
+const Product = require('../models/product')
 
 module.exports.add_mainCategory = async (req, res) => {
     const { name, view } = req.body
@@ -16,17 +17,56 @@ module.exports.add_mainCategory = async (req, res) => {
     })
 }
 
-module.exports.get_mainCategory = async (req, res) => {
-    await MainCategory.find({view: true}).then(e => {
-        res.status(200).json({
-            response: e
-        })
-    }).catch(err => {
-        console.log(err.message)
-        res.status(404).json({ error: err.message })
-    })
-}
+// module.exports.get_mainCategory = async (req, res) => {
+    // await MainCategory.find({view: true})
+    // .then(e => {
+    //     res.status(200).json({
+    //         response: e
+    //     })
+    // }).catch(err => {
+    //     console.log(err.message)
+    //     res.status(404).json({ error: err.message })
+    // })
 
+ 
+// }
+
+
+module.exports.get_mainCategory = async (req, res) => {
+    try {
+        const categoryStock = await Product.aggregate([
+            {
+                $group: {
+                    _id: '$category', // Group products by category
+                    totalStock: { $sum: '$quantity.OS' }, // Calculate the total stock for each category
+                },
+            },
+            {
+                $lookup: {
+                    from: 'maincategories', // The name of the collection to lookup
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'categoryDetails',
+                },
+            },
+            {
+                $unwind: '$categoryDetails',
+            },
+            {
+                $project: {
+                    // categoryID: '$categoryDetails._id',
+                    categoryName: '$categoryDetails.name',
+                    totalStock: 1,
+                },
+            },
+        ]);
+
+        res.json(categoryStock);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching data' });
+    }
+};
 module.exports.get_mainCategory_by_id = async (req, res) => {
     const _id = new mongoose.Types.ObjectId(req.params.id)
     await MainCategory.findById(_id).then(e => {

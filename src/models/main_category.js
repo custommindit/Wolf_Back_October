@@ -7,7 +7,8 @@ const MainCategorySchema = new Schema({
     },
     view: {
         type: Boolean
-    }
+    },
+    products: [{ type: mongoose.Types.ObjectId, ref: 'product' }]
 }
 , 
 {
