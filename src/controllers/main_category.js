@@ -39,6 +39,7 @@ module.exports.get_mainCategory = async (req, res) => {
                 $group: {
                     _id: '$category', // Group products by category
                     totalStock: { $sum: '$quantity.OS' }, // Calculate the total stock for each category
+                    suppliers: { $addToSet: '$supplier' }, // Collect unique suppliers in each category
                 },
             },
             {
@@ -57,6 +58,7 @@ module.exports.get_mainCategory = async (req, res) => {
                     // categoryID: '$categoryDetails._id',
                     categoryName: '$categoryDetails.name',
                     totalStock: 1,
+                    numSuppliers: { $size: '$suppliers' }, // Count the number of unique suppliers
                 },
             },
         ]);
