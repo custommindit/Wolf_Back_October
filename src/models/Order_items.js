@@ -17,7 +17,7 @@ const order_items_Schema = new Schema({
                 type: String
             },
             image: {
-                type: String
+                type: Array
             },
             price: {
                 type: Number
