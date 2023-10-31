@@ -72,5 +72,4 @@ router.post(
   product_controller.getProductBySubCategory2filter
 );
 
-router.post("/test", product_controller.salepercent);
 module.exports = router;

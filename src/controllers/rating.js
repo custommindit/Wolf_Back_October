@@ -1,10 +1,11 @@
 const Rating = require('../models/rating')
 
-module.exports.createRate = (req, res, next) => {
+module.exports.createRate =async (req, res, next) => {
     try {
         const body = req.body;
-
-        const rateFound = Rating.findOne({ product_id: req.params.product_id, user_id: body.decoded.id })
+        console.log(req.body,req.params.product_id)
+        
+        const rateFound = await Rating.findOne({ product_id: req.params.product_id, user_id: body.decoded.id })
 
         if (rateFound !== null) {
             return res.json({

@@ -50,7 +50,7 @@ module.exports.get_subCategory = async (req, res) => {
             },
         ]);
 
-        res.json(subCategoryStock);
+        res.json({response:subCategoryStock});
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'An error occurred while fetching data' });

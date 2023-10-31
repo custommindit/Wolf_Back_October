@@ -56,14 +56,14 @@ module.exports.get_mainCategory = async (req, res) => {
             {
                 $project: {
                     // categoryID: '$categoryDetails._id',
-                    categoryName: '$categoryDetails.name',
+                    name: '$categoryDetails.name',
                     totalStock: 1,
                     numSuppliers: { $size: '$suppliers' }, // Count the number of unique suppliers
                 },
             },
         ]);
 
-        res.json(categoryStock);
+        res.json({categories    :categoryStock});
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'An error occurred while fetching data' });

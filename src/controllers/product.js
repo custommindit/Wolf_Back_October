@@ -512,9 +512,11 @@ module.exports.getProductBySubCategory2 = async (req, res) => {
           rates1.push(totalRate);
         });
       }
+      const count=await Product.count(query)
       return res.json({
         response: e,
         rates: rates1,
+        count:count
       });
     })
     .catch((err) => {
@@ -559,7 +561,9 @@ module.exports.DeleteProduct = async (req, res) => {
 module.exports.getHomeRecents = async (req, res) => {
   try {
     let id = req.params.id;
-    Product.find({ category_id: id })
+    ////in accordance to type change
+    const newid=new  mongoose.Types.ObjectId(id)
+    Product.find({ category_id: newid })
       .sort({ _id: -1 })
       .limit(4)
       .then(async (documents) => {
@@ -703,21 +707,53 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
     subCategory: _id,
     view: true,
   };
-  if (body.maxprice) {
-    query.price_after = { $lte: body.maxprice };
+  if (body.minprice || body.maxprice) {
+    query.price_after = {};
+    if (body.minprice) {
+      query.price_after.$gte = body.minprice;
+    }
+    if (body.maxprice) {
+      query.price_after.$lte = body.maxprice;
+    }
   }
-  if (body.minprice) {
-    query.price_after = { $lte: body.minprice };
-  }
+  
   if (body.sizes) {
     query.quantity = { $in: body.sizes };
   }
-  console.log(query);
+  if(body.minpercent)
+  {
+    query.$expr= {
+      $and: [
+        {
+          $gte: [
+            {
+              $multiply: [
+                { $divide: ["$price_after", "$price_before"] },
+                100,
+              ],
+            },
+            body.minpercent,
+          ],
+        },
+        {
+          $lte: [
+            {
+              $multiply: [
+                { $divide: ["$price_after", "$price_before"] },
+                100,
+              ],
+            },
+            body.maxpercent,
+          ],
+        },
+      ],
+    }
+  }
   const options = {
     skip: (req.params.page - 1) * perPage,
     limit: perPage,
   };
-  await Product.find(query, null, options)
+  Product.find(query, null, options)
     .then(async (e) => {
       let rates1 = [];
       for (var i = 0; i < e.length; i++) {
@@ -733,9 +769,12 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
           rates1.push(totalRate);
         });
       }
+      const count= await Product.count(query)
+      console.log("Hello", count)///prints but doesn't return
       return res.json({
         response: e,
         rates: rates1,
+        count:count
       });
     })
     .catch((err) => {
@@ -743,39 +782,3 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
     });
 };
 
-module.exports.salepercent = async (req, res) => {
-  try {
-    Product.find({
-      $expr: {
-        $and: [
-          {
-            $gte: [
-              {
-                $multiply: [
-                  { $divide: ["$price_after", "$price_before"] },
-                  100,
-                ],
-              },
-              req.body.minpercent,
-            ],
-          },
-          {
-            $lte: [
-              {
-                $multiply: [
-                  { $divide: ["$price_after", "$price_before"] },
-                  100,
-                ],
-              },
-              req.body.maxpercent,
-            ],
-          },
-        ],
-      },
-    }).then((response) => {
-      res.json({ response });
-    });
-  } catch (error) {
-    res.json({ response: [] });
-  }
-};
