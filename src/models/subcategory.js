@@ -14,7 +14,8 @@ const SubCategorySchema = new Schema({
     Image:{
         type:String
         ,required:true
-    }
+    },
+    products: [{ type: Schema.Types.ObjectId, ref: 'product' }], // Reference to the Product schema
 }
 , 
 {

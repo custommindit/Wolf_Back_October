@@ -19,16 +19,43 @@ module.exports.add_subcategory = async (req, res) => {
     })
 }
 
-module.exports.get_subcategory = async (req, res) => {
-    SubCategory.find().then(e => {
-        res.status(200).json({
-            response: e
-        })
-    }).catch(err => {
-        console.log(err.message)
-        res.status(404).json({ error: err.message })
-    })
-}
+// module.exports.get_subcategory = async (req, res) => {
+//     SubCategory.find().then(e => {
+//         res.status(200).json({
+//             response: e
+//         })
+//     }).catch(err => {
+//         console.log(err.message)
+//         res.status(404).json({ error: err.message })
+//     })
+// }
+module.exports.get_subCategory = async (req, res) => {
+    try {
+        const subCategoryStock = await SubCategory.aggregate([
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: '_id',
+                    foreignField: 'subCategory',
+                    as: 'subCategoryProducts',
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    totalStock: { $sum: '$subCategoryProducts.quantity.OS' },
+                    numSuppliers: { $size: { $setUnion: '$subCategoryProducts.supplier' } },
+                },
+            },
+        ]);
+
+        res.json(subCategoryStock);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching data' });
+    }
+};
 
 module.exports.get_subcategory_by_id = async (req, res) => {
     const _id = new mongoose.Types.ObjectId(req.params.id)
