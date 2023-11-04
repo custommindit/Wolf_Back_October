@@ -30,6 +30,11 @@ const userSchema = new Schema({
     ban: {
         type: Boolean
     },
+    provider:{
+        type: String,
+        enum: ['google', 'facebook', 'system'], // Allowed values for the provider field
+        default: 'system', // Set the default value to 'system'
+      },
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null },
 }, { timeseries: true })

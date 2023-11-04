@@ -11,7 +11,7 @@ const {
   login,
   getall,
   search,
-  view, viewed, changepassword, softDeleteUser
+  view, viewed, changepassword, softDeleteUser, googleSocialLogin
 } = require("../../controllers/UserController");
 
 router.get("/view_profile", checkToken, viewProfile);
@@ -25,5 +25,9 @@ router.patch("/update_profile", checkToken, updateProfile);
 router.delete("/delete_profile", checkToken, deleteProfile);
 router.patch("/update_password", checkToken, changepassword);
 router.patch("/softDelete", checkToken, softDeleteUser);
+//socialLogin
+router.post("/google-login", googleSocialLogin);
+
+
 
 module.exports = router;

@@ -17,19 +17,20 @@ module.exports.add_mainCategory = async (req, res) => {
     })
 }
 
-// module.exports.get_mainCategory = async (req, res) => {
-    // await MainCategory.find({view: true})
-    // .then(e => {
-    //     res.status(200).json({
-    //         response: e
-    //     })
-    // }).catch(err => {
-    //     console.log(err.message)
-    //     res.status(404).json({ error: err.message })
-    // })
+////////////////////////////////fetching main category user e-commerce
+module.exports.getMainCategory = async (req, res) => {
+    await MainCategory.find({view: true})
+    .then(e => {
+        res.status(200).json({
+            response: e
+        })
+    }).catch(err => {
+        console.log(err.message)
+        res.status(404).json({ error: err.message })
+    })
 
  
-// }
+}
 
 
 module.exports.get_mainCategory = async (req, res) => {
@@ -63,12 +64,13 @@ module.exports.get_mainCategory = async (req, res) => {
             },
         ]);
 
-        res.json({categories    :categoryStock});
+        res.status(200).json({response:categoryStock});
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'An error occurred while fetching data' });
     }
 };
+
 module.exports.get_mainCategory_by_id = async (req, res) => {
     const _id = new mongoose.Types.ObjectId(req.params.id)
     await MainCategory.findById(_id).then(e => {

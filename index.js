@@ -6,7 +6,7 @@ const router = require("./src/routes/index");
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
-app.use(express.json());
+// app.use(express.json());
 
 const connectDB = async () => {
   try {
