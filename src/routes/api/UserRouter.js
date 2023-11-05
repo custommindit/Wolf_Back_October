@@ -11,7 +11,7 @@ const {
   login,
   getall,
   search,
-  view, viewed, changepassword, softDeleteUser, googleSocialLogin
+  view, viewed, changepassword, softDeleteUser, googleSocialLogin, facebookSocailLogin
 } = require("../../controllers/UserController");
 
 router.get("/view_profile", checkToken, viewProfile);
@@ -27,6 +27,9 @@ router.patch("/update_password", checkToken, changepassword);
 router.patch("/softDelete", checkToken, softDeleteUser);
 //socialLogin
 router.post("/google-login", googleSocialLogin);
+router.post("/facebook-login", facebookSocailLogin);
+
+
 
 
 
