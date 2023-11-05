@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const multer = require("multer");
 const ratingRouter = require("./api/rating");
 const colorsRouter = require("./api/colors");
 const sizeRouter = require("./api/size");
@@ -10,9 +11,12 @@ const rateRouter = require("./api/rating");
 const userRouter = require("./api/UserRouter");
 const cartRouter = require("./api/cart");
 const wishRouter = require("./api/wish");
-const orderRouter=require("./api/order_items")
+const orderRouter = require("./api/order_items");
+const { uploadFile } = require("../controllers/upload");
 
 const router = Router();
+
+const upload = multer({ dest: "uploads/" });
 
 router.use("/rating", ratingRouter);
 router.use("/colors", colorsRouter);
@@ -25,7 +29,7 @@ router.use("/rate", rateRouter);
 router.use("/user", userRouter);
 router.use("/cart", cartRouter);
 router.use("/wish", wishRouter);
-router.use("/order",orderRouter)
-
+router.use("/order", orderRouter);
+router.post("/upload", upload.single("file"), uploadFile);
 
 module.exports = router;

@@ -7,10 +7,8 @@ const HotSale = require("../models/hotsales");
 const mongoose = require("mongoose");
 const { MakeRequest, getmodels, requesttryon } = require("./vrRoom.js");
 var cloudinary = require("../utils/cloudinary.js");
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
-
-
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
 module.exports.getProductById = (req, res, next) => {
   try {
@@ -53,14 +51,13 @@ module.exports.getProductById = (req, res, next) => {
 };
 
 module.exports.getProducts = (req, res, next) => {
-  Product.find({}).populate(
-    {
-    path:'category',
-    }).populate(
-    {
-    path:'subCategory',
-    },
-      )
+  Product.find({})
+    .populate({
+      path: "category",
+    })
+    .populate({
+      path: "subCategory",
+    })
     .then((result) => {
       res.status(200).send(result);
     })
@@ -206,16 +203,17 @@ module.exports.uplodaImage = async (req, res, next) => {
 };
 
 module.exports.uplodaImageCloud = async (req, res, next) => {
- let images = [];
+  let images = [];
   if (!req.files || req.files.length === 0) {
     return res.status(400).send("No file uploaded");
   }
   for (var i = 0; i < req.files.length; i++) {
-    const  { secure_url, public_id } = await cloudinary.uploader.upload(
+    const { secure_url, public_id } = await cloudinary.uploader.upload(
       req.files[i].path,
-      { folder:`${process.env.FOLDER_CLOUD_NAME}/product/images` });
-      images.push({ secure_url, public_id })
-        }
+      { folder: `${process.env.FOLDER_CLOUD_NAME}/product/images` }
+    );
+    images.push({ secure_url, public_id });
+  }
   const body = req.body;
   let quantity = JSON.parse(body.quantity);
   const sizes = Object.keys(quantity);
@@ -324,7 +322,6 @@ module.exports.uplodaImageCloud = async (req, res, next) => {
     });
   }
 };
-
 
 module.exports.models = async (req, res) => {
   await getmodels(req.body.gender)
@@ -512,11 +509,11 @@ module.exports.getProductBySubCategory2 = async (req, res) => {
           rates1.push(totalRate);
         });
       }
-      const count=await Product.count(query)
+      const count = await Product.count(query);
       return res.json({
         response: e,
         rates: rates1,
-        count:count
+        count: count,
       });
     })
     .catch((err) => {
@@ -562,7 +559,7 @@ module.exports.getHomeRecents = async (req, res) => {
   try {
     let id = req.params.id;
     ////in accordance to type change
-    const newid=new  mongoose.Types.ObjectId(id)
+    const newid = new mongoose.Types.ObjectId(id);
     Product.find({ category_id: newid })
       .sort({ _id: -1 })
       .limit(4)
@@ -716,21 +713,17 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
       query.price_after.$lte = body.maxprice;
     }
   }
-  
+
   if (body.sizes) {
     query.quantity = { $in: body.sizes };
   }
-  if(body.minpercent)
-  {
-    query.$expr= {
+  if (body.minpercent) {
+    query.$expr = {
       $and: [
         {
           $gte: [
             {
-              $multiply: [
-                { $divide: ["$price_after", "$price_before"] },
-                100,
-              ],
+              $multiply: [{ $divide: ["$price_after", "$price_before"] }, 100],
             },
             body.minpercent,
           ],
@@ -738,16 +731,13 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
         {
           $lte: [
             {
-              $multiply: [
-                { $divide: ["$price_after", "$price_before"] },
-                100,
-              ],
+              $multiply: [{ $divide: ["$price_after", "$price_before"] }, 100],
             },
             body.maxpercent,
           ],
         },
       ],
-    }
+    };
   }
   const options = {
     skip: (req.params.page - 1) * perPage,
@@ -769,16 +759,15 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
           rates1.push(totalRate);
         });
       }
-      const count= await Product.count(query)
-      console.log("Hello", count)///prints but doesn't return
+      const count = await Product.count(query);
+      console.log("Hello", count); ///prints but doesn't return
       return res.json({
         response: e,
         rates: rates1,
-        count:count
+        count: count,
       });
     })
     .catch((err) => {
       return res.json({ message: err.message });
     });
 };
-
