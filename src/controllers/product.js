@@ -68,6 +68,24 @@ module.exports.getProducts = (req, res, next) => {
       res.status(500).send(err);
     });
 };
+//get last four products 
+module.exports.getLastFourProducts = (req, res, next) => {
+  Product.find({})
+    .sort({ _id: -1 }) // Sort by ObjectId in descending order (latest first)
+    .limit(4) // Limit the results to the last four products
+    .populate({
+      path: 'category',
+    })
+    .populate({
+      path: 'subCategory',
+    })
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+};
 
 module.exports.getProductsBySupCategory = (req, res, next) => {
   try {
