@@ -85,6 +85,35 @@ module.exports.getProductsBySupCategory = (req, res, next) => {
   }
 };
 
+module.exports.createProduct = async (req, res, next) => {
+  const body = req.body;
+  try {
+    const product = new Product({
+      supplier: "Wolf",
+      category: body.category,
+      subCategory: body.subCategory,
+      typeOfProduct: body.typeOfProduct,
+      first_visit: false,
+      name: body.name,
+      dressing: body.dressing,
+      color: body.color,
+      brand: body.brand,
+      SKU: body.SKU,
+      price_before: body.price_before,
+      price_after: body.price_after,
+      imageSrc: body.images,
+      desc: body.desc,
+      description: body.description,
+      quantity: body.quantity,
+      view: true,
+    });
+    const data = await product.save();
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports.uplodaImage = async (req, res, next) => {
   let images = [];
   if (!req.files || req.files.length === 0) {

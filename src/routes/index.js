@@ -12,7 +12,7 @@ const userRouter = require("./api/UserRouter");
 const cartRouter = require("./api/cart");
 const wishRouter = require("./api/wish");
 const orderRouter = require("./api/order_items");
-const { uploadFile } = require("../controllers/upload");
+const { uploadFile, uploadFiles } = require("../controllers/upload");
 
 const router = Router();
 
@@ -31,5 +31,6 @@ router.use("/cart", cartRouter);
 router.use("/wish", wishRouter);
 router.use("/order", orderRouter);
 router.post("/upload", upload.single("file"), uploadFile);
+router.post("/upload-multiple", upload.array("files"), uploadFiles);
 
 module.exports = router;

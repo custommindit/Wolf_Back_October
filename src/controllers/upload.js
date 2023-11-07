@@ -33,6 +33,29 @@ const uploadFile = async (req, res) => {
   }
 };
 
+const uploadFiles = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      res.status(400).json("No Files");
+    } else {
+      const urls = await Promise.all(
+        req.files.map(async (file) => {
+          const data = await cloudinary.uploader.upload(file.path, {
+            folder: `${process.env.FOLDER_CLOUD_NAME}/images/`,
+          });
+          await unlinkAsync(file.path);
+          return data.url;
+        })
+      );
+
+      res.status(200).json({ urls: urls });
+    }
+  } catch (error) {
+    res.status(500);
+  }
+};
+
 module.exports = {
   uploadFile,
+  uploadFiles,
 };
