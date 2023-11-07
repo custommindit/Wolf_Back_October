@@ -74,7 +74,6 @@ module.exports.get_subcategory_by_main_category2 = async (req, res) => {
   try {
     const id = req.params.id;
     const data = await SubCategory.find({ category: id });
-    console.log("here");
     res.status(200).json(data);
   } catch (error) {
     res.status(404).json({ error: error.message });
