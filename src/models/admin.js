@@ -6,7 +6,12 @@ const AdminScheema = new Schema({
     },
     password: {
         type: String
-    }})
+    },
+    role:{
+        type:String,
+        required:true
+    }
+})
 
     const Admin = mongoose.model('admin', AdminScheema)
 module.exports = Admin

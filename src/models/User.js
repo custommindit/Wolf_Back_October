@@ -32,6 +32,10 @@ const userSchema = new Schema({
     },
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null },
+    role:{
+        type:String,
+        required:true
+    }
 }, { timeseries: true })
 
 userSchema.statics.isThisEmailUse = async function (email) {

@@ -53,9 +53,10 @@ const signUp = async (req, res) => {
       first_name: body.first_name,
       last_name: body.last_name,
       telephone: body.telephone,
-      gender:"",
+      gender:body.gender,
       ban: false,
-      viewed:[]
+      viewed:[],
+      role:body.role
     });
     user.save().then((response) => {
       res.json({
@@ -145,7 +146,7 @@ const login = async (req, res, next) => {
 
             if (result) {
               let token = jwt.sign(
-                { email: user.email, id: user._id, name: user.first_name + " " + user.last_name },
+                { email: user.email, id: user._id, name: user.first_name + " " + user.last_name ,role:"user" },
                 process.env.JWT_KEY
               );
               res.json({
