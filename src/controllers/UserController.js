@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const product = require("../models/product");
 const Rating = require("../models/rating");
+const { OAuth2Client } = require("google-auth-library");
 const bcrypt = require("bcrypt");
 const { hashSync, genSaltSync } = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -56,7 +57,7 @@ const signUp = async (req, res) => {
       gender:body.gender,
       ban: false,
       viewed:[],
-      role:body.role
+      // role:body.role
     });
     user.save().then((response) => {
       res.json({
@@ -146,7 +147,7 @@ const login = async (req, res, next) => {
 
             if (result) {
               let token = jwt.sign(
-                { email: user.email, id: user._id, name: user.first_name + " " + user.last_name ,role:"user" },
+                { email: user.email, id: user._id, name: user.first_name + " " + user.last_name,role:"user" },
                 process.env.JWT_KEY
               );
               res.json({
@@ -386,6 +387,145 @@ const softDeleteUser = async (req, res) => {
     res.status(200).json({ message: "Internal Server Error" });
   }
 };
+///////////////////////////////////////////////////////////social Login//////////////////////////////
+const CLIENT_ID =process.env.CLIENT_ID// Replace with your actual Google Client ID
+const client = new OAuth2Client(CLIENT_ID);
+async function verifyIdToken(token) {
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: CLIENT_ID, // Specify the CLIENT_ID of your app that accesses the backend
+    });
+    const payload = ticket.getPayload();
+    return payload;
+
+}
+
+const googleSocialLogin=async(req,res,next)=>{
+  const { idToken } = req.body;
+  try {
+    const {name,email,email_verified,given_name,family_name} = await verifyIdToken(idToken);
+    // Process the decoded information as needed
+    // ...
+    // Respond with success or processed data
+    if(!email_verified){
+      return res.status(200).json({ success: false, error: 'in-valid email' })
+    }
+    const user = await User.findOne({email:email})
+    //if user  exist in system
+    if(user){
+      if(user?.provider!=="google"){
+        return res.status(200).json({ success: false, error: `in-valid provider, provider is ${user.provider}`})
+      }
+      let token = jwt.sign(
+        { email: user.email, id: user._id, name: user.first_name + " " + user.last_name ,role:"user"},
+        process.env.JWT_KEY
+      );
+      return res.json({
+        success: true,
+        message: "Login Successful!",
+        token: token,
+      });
+    }
+    //if user doesnt exist in system
+    const randomPassword = Math.random().toString(36).slice(-8); // Generate a random 8-character password
+    const salt = genSaltSync(10);
+    const hashedPassword =  hashSync(randomPassword, salt); // Hash the password
+     let newUser = new User({
+      username:name,
+      email:email,
+      password: hashedPassword,
+      first_name: given_name,
+      last_name: family_name,
+      provider:"google",
+      ban: false,
+      viewed:[]
+    });
+    await newUser.save();
+    let token = jwt.sign(
+      { email: newUser.email, id: newUser._id, name: newUser.first_name + " " + newUser.last_name ,role:"user"},
+      process.env.JWT_KEY
+    );
+    // return res.status(200).json({ success: true, message: 'Token verified successfully', payload });
+    return res.status(200).json({
+      success: true,
+      message: "Signed up successfully",
+      // email: newUser.email,
+      token
+    });
+  } catch (error) {
+    // Handle verification error
+    console.error('Verification error:', error);
+    // return Respond with an error to the client
+    return res.status(200).json({ success: false, error: 'Unauthorized' ,error});
+  }
+
+}
+
+///////////////////////////////////////////////////////////facebook Login//////////////////////////////
+
+const facebookSocailLogin=async(req,res,next)=>{
+  // console.log(req.body)
+  const { name,email,first_name,last_name } = req.body.response.data;
+  const {provider}=req.body.response
+  try {
+    // const {name,email,provider,first_name,last_name} = await verifyIdToken(idToken);
+    // Process the decoded information as needed
+    // ...
+    // Respond with success or processed data
+    if(provider!=="facebook"){
+      return res.status(200).json({ success: false, error: 'in-valid email' })
+    }
+    const user = await User.findOne({email:email})
+    //if user  exist in system
+    if(user){
+      if(user?.provider!=="facebook"){
+        return res.status(200).json({ success: false, error: `in-valid provider, provider is ${user.provider}`})
+      }
+      let token = jwt.sign(
+        { email: user.email, id: user._id, name: user.first_name + " " + user.last_name,role:"user" },
+        process.env.JWT_KEY
+      );
+      return res.json({
+        success: true,
+        message: "Login Successful!",
+        token: token,
+      });
+    }
+    //if user doesnt exist in system
+    const randomPassword = Math.random().toString(36).slice(-8); // Generate a random 8-character password
+    const salt = genSaltSync(10);
+    const hashedPassword =  hashSync(randomPassword, salt); // Hash the password
+     let newUser = new User({
+      username:name,
+      email:email,
+      password: hashedPassword,
+      first_name: first_name,
+      last_name: last_name,
+      provider:"facebook",
+      ban: false,
+      viewed:[]
+    });
+    await newUser.save();
+    let token = jwt.sign(
+      { email: newUser.email, id: newUser._id, name: newUser.first_name + " " + newUser.last_name,role:"user" },
+      process.env.JWT_KEY
+    );
+    // return res.status(200).json({ success: true, message: 'Token verified successfully', payload });
+    return res.status(200).json({
+      success: true,
+      message: "Signed up successfully",
+      // email: newUser.email,
+      token
+    });
+  } catch (error) {
+    // Handle verification error
+    console.error('Verification error:', error);
+    // return Respond with an error to the client
+    return res.status(200).json({ success: false, error: 'Unauthorized' ,error});
+  }
+
+}
 
 
 
@@ -402,5 +542,7 @@ module.exports = {
   changepassword,
   banUser,
   unbanUser,
-  softDeleteUser
+  softDeleteUser,
+  googleSocialLogin,
+facebookSocailLogin
 };

@@ -23,7 +23,7 @@ const login = async(req, res, next) => {
                         }
 
                         if(result){
-                            let token = jwt.sign({email:admin.email, id: admin._id,role:admin.role}, process.env.JWT_KEY)
+                            let token = jwt.sign({email:admin.email, id: admin._id,role:admin.role}, process.env.JWT_KEY)//,
                             res.json({
                                 message: 'Login Successful!',
                                 token: token,
@@ -81,7 +81,7 @@ const signUp = async (req, res) => {
         let admin = new Admin({
             email: body.email,
             password: body.password,
-            role:body.role
+           role:body.role
            
         })
         

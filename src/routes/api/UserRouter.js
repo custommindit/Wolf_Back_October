@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { checkToken } = require("../../auth/token_validation");
+const { checkToken, roles } = require("../../auth/token_validation");
 var validation = require("../../validation/main.validation.js").validation;
 var {sign_up} = require("../../validation/user.validation");
 
@@ -11,19 +11,24 @@ const {
   login,
   getall,
   search,
-  view, viewed, changepassword, softDeleteUser
+  view, viewed, changepassword, softDeleteUser, facebookSocailLogin, googleSocialLogin
 } = require("../../controllers/UserController");
 
-router.get("/view_profile", checkToken, viewProfile);
-router.get("/", checkToken, getall);
+router.get("/view_profile", checkToken([roles.user]), viewProfile);
+router.get("/", checkToken([roles.admin]), getall);
 router.post("/sign_up",validation(sign_up), signUp);
-router.post("/view", checkToken, view);
-router.get("/viewed", checkToken, viewed);
-router.post("/search", checkToken, search);
+router.post("/view", checkToken([roles.user]), view);
+router.get("/viewed", checkToken([roles.user]), viewed);
+router.post("/search", checkToken([roles.user]), search);
 router.post("/login", login);
-router.patch("/update_profile", checkToken, updateProfile);
-router.delete("/delete_profile", checkToken, deleteProfile);
-router.patch("/update_password", checkToken, changepassword);
-router.patch("/softDelete", checkToken, softDeleteUser);
+router.patch("/update_profile", checkToken([roles.user]), updateProfile);
+router.delete("/delete_profile", checkToken([roles.user]), deleteProfile);
+router.patch("/update_password", checkToken([roles.user]), changepassword);
+router.patch("/softDelete", checkToken([roles.user]), softDeleteUser);
+//socialLogin
+router.post("/google-login", googleSocialLogin);
+router.post("/facebook-login",facebookSocailLogin);
+
+
 
 module.exports = router;
