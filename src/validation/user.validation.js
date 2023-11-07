@@ -8,5 +8,6 @@ exports.sign_up = joi.object({
     telephone: globalValidationFields.phone,
     gender: globalValidationFields.gender,
     last_name: globalValidationFields.name,
-    first_name: globalValidationFields.name
+    first_name: globalValidationFields.name,
+    role:joi.string().valid("user").required(),
 }).required();

@@ -2,13 +2,15 @@ const Admin = require('../models/admin')
 const mongoose = require('mongoose')
 const bcrypt = require("bcrypt")
 const { hashSync, genSaltSync } = require("bcrypt");
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 require("dotenv").config(); 
 
 const login = async(req, res, next) => {
     try{
         var email = req.body.email
         var password = req.body.password
+        var role = req.body.role
         
         Admin.findOne({$or: [{email: email}, {password: password}]})
             .then(admin => {
@@ -21,7 +23,7 @@ const login = async(req, res, next) => {
                         }
 
                         if(result){
-                            let token = jwt.sign({email:admin.email, id: admin._id,admin:true}, process.env.JWT_KEY)
+                            let token = jwt.sign({email:admin.email, id: admin._id,role:admin.role}, process.env.JWT_KEY)
                             res.json({
                                 message: 'Login Successful!',
                                 token: token,
@@ -48,7 +50,25 @@ const login = async(req, res, next) => {
 const signUp = async (req, res) => {
     try{
         const body = req.body;
-
+        if (body.role== "user") {
+            return res.json({
+                message: "You Are Not Allowed To SignUp Here"
+            })
+        }
+        const isEmailExistInUser = await User.isThisEmailUse(body.email);
+        if (isEmailExistInUser) {
+          return res.json({
+            success: false,
+            message: "This email is already in use by another user",
+          });
+        }
+        const isEmailExistInAdmin = await Admin.findOne({email:body.email});
+        if (isEmailExistInAdmin) {
+          return res.json({
+            success: false,
+            message: "This email is already in use by another admin",
+          });
+        }
         const salt = genSaltSync(10);
 
         try {
@@ -58,10 +78,10 @@ const signUp = async (req, res) => {
                 message: "password error"
             })
         }
-
         let admin = new Admin({
             email: body.email,
             password: body.password,
+            role:body.role
            
         })
         
@@ -72,7 +92,8 @@ const signUp = async (req, res) => {
             obj:response
             })
         })
-    }catch(error){
+    }
+    catch(error){
         res.json({
             message: "error"
         })
