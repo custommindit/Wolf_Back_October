@@ -10,6 +10,7 @@ const MainCategorySchema = new Schema(
       type: String,
     },
     view: {
+      default: true,
       type: Boolean,
     },
     products: [{ type: mongoose.Types.ObjectId, ref: "product" }],
