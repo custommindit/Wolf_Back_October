@@ -4,6 +4,8 @@ const Brand = require("../models/brands.js");
 const Color = require("../models/colors.js");
 const Size = require("../models/size.js");
 const HotSale = require("../models/hotsales");
+const Cart = require("../models/cart");
+const Wish = require("../models/wish");
 const mongoose = require("mongoose");
 const { MakeRequest, getmodels, requesttryon } = require("./vrRoom.js");
 var cloudinary = require("../utils/cloudinary.js");
@@ -65,14 +67,14 @@ module.exports.getProducts = (req, res, next) => {
       res.status(500).send(err);
     });
 };
-/////////////get last four products 
+/////////////get last four products
 module.exports.getLastFourProducts = async (req, res, next) => {
   try {
     const products = await Product.find({})
       .sort({ _id: -1 })
       .limit(4)
-      .populate({ path: 'category' })
-      .populate({ path: 'subCategory' });
+      .populate({ path: "category" })
+      .populate({ path: "subCategory" });
 
     let productsWithRatings = [];
 
@@ -97,10 +99,10 @@ module.exports.getLastFourProducts = async (req, res, next) => {
         subCategory: product.subCategory,
         // Add other product fields as needed
         averageRating: totalRate,
-        images:product.images,
-        price_after:product.price_after,
-        price_before:product.price_before,
-        brand:product.brand,
+        images: product.images,
+        price_after: product.price_after,
+        price_before: product.price_before,
+        brand: product.brand,
       };
 
       productsWithRatings.push(productWithRating);
@@ -113,10 +115,10 @@ module.exports.getLastFourProducts = async (req, res, next) => {
 };
 //get four products related to specific product by category id
 module.exports.getRelatedProducts = async (req, res, next) => {
-try {
-  const { categoryId } = req.params;
- const products= await Product.find({ category: categoryId }).limit(4)
- // Limit the results to a certain number of related products
+  try {
+    const { categoryId } = req.params;
+    const products = await Product.find({ category: categoryId }).limit(4);
+    // Limit the results to a certain number of related products
     let productsWithRatings = [];
     for (let i = 0; i < products.length; i++) {
       const product = products[i];
@@ -138,29 +140,25 @@ try {
         subCategory: product.subCategory,
         // Add other product fields as needed
         averageRating: totalRate,
-        images:product.images,
-        price_after:product.price_after,
-        price_before:product.price_before,
-        brand:product.brand,
+        images: product.images,
+        price_after: product.price_after,
+        price_before: product.price_before,
+        brand: product.brand,
       };
 
       productsWithRatings.push(productWithRating);
     }
     res.status(200).json(productsWithRatings);
-  
-} catch (error) {
-  res.status(500).json({ success: false, message: "Internal Server Error" });
-
-  
-}
-    // .then((relatedProducts) => {
-    //   res.status(200).send(relatedProducts);
-    // })
-    // .catch((err) => {
-    //   res.status(500).send(err);
-    // });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+  // .then((relatedProducts) => {
+  //   res.status(200).send(relatedProducts);
+  // })
+  // .catch((err) => {
+  //   res.status(500).send(err);
+  // });
 };
-
 
 module.exports.getProductsBySupCategory = (req, res, next) => {
   try {
