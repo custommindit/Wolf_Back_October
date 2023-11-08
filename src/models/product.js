@@ -7,12 +7,12 @@ const productSchema = new Schema(
       type: String,
     },
     category: {
-      type:mongoose.Types.ObjectId,
-      ref:'MainCategory',
+      type: mongoose.Types.ObjectId,
+      ref: "MainCategory",
     },
     subCategory: {
-      type:mongoose.Types.ObjectId,
-      ref:'SubCategory',
+      type: mongoose.Types.ObjectId,
+      ref: "SubCategory",
       // index: true,
     },
     first_visit: {
@@ -35,10 +35,8 @@ const productSchema = new Schema(
       default: 0,
     },
     images: {
-      type:Array,
-      required:true,
-      public_id:String,
-      secure_url:String
+      type: [String],
+      required: true,
     },
     desc: {
       type: Object,
@@ -71,14 +69,12 @@ const productSchema = new Schema(
     garment_id: {
       type: String,
     },
-    linked_products: [
-      String
-    ],
+    linked_products: [String],
     color: {
       type: String,
       required: true,
     },
-  
+
     brand: {
       type: String,
       required: true,
@@ -86,7 +82,6 @@ const productSchema = new Schema(
   },
   { timestamps: true }
 );
-
 
 const Product = mongoose.model("product", productSchema);
 module.exports = Product;
