@@ -1,13 +1,13 @@
 const { Router } = require('express')
 const CartController = require('../../controllers/cart')
-const { checkToken } = require("../../auth/token_validation");
+const { checkToken, roles } = require("../../auth/token_validation");
 
 const router = Router()
 
-router.post('/', checkToken, CartController.Create_cart_item)
-router.get('/', checkToken, CartController.Read_cart_items)
-router.delete('/:id', checkToken, CartController.Delete_cart_item)
-router.put('/plus/:id', checkToken, CartController.add_one_quantity)
-router.put('/minus/:id', checkToken, CartController.remove_one_quantity)
+router.post('/', checkToken([roles.user]), CartController.Create_cart_item)
+router.get('/', checkToken([roles.user]), CartController.Read_cart_items)
+router.delete('/:id', checkToken([roles.user]), CartController.Delete_cart_item)
+router.put('/plus/:id', checkToken([roles.user]), CartController.add_one_quantity)
+router.put('/minus/:id', checkToken([roles.user]), CartController.remove_one_quantity)
 
 module.exports = router

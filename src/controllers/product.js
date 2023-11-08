@@ -42,7 +42,7 @@ module.exports.getProductById = (req, res, next) => {
       });
     }
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
     return res.json({
       status: false,
       message: "Error",
@@ -65,6 +65,102 @@ module.exports.getProducts = (req, res, next) => {
       res.status(500).send(err);
     });
 };
+/////////////get last four products 
+module.exports.getLastFourProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({})
+      .sort({ _id: -1 })
+      .limit(4)
+      .populate({ path: 'category' })
+      .populate({ path: 'subCategory' });
+
+    let productsWithRatings = [];
+
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const rates = await Rating.find({ product_id: product._id });
+      let total = 0;
+      let totalRate = 0;
+
+      if (rates.length > 0) {
+        rates.forEach((rate) => {
+          total = total + rate.rate;
+        });
+        totalRate = total / rates.length;
+      }
+
+      // Create a new object with product details and average rating
+      const productWithRating = {
+        _id: product._id,
+        name: product.name,
+        category: product.category,
+        subCategory: product.subCategory,
+        // Add other product fields as needed
+        averageRating: totalRate,
+        images:product.images,
+        price_after:product.price_after,
+        price_before:product.price_before,
+        brand:product.brand,
+      };
+
+      productsWithRatings.push(productWithRating);
+    }
+
+    res.status(200).json(productsWithRatings);
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+//get four products related to specific product by category id
+module.exports.getRelatedProducts = async (req, res, next) => {
+try {
+  const { categoryId } = req.params;
+ const products= await Product.find({ category: categoryId }).limit(4)
+ // Limit the results to a certain number of related products
+    let productsWithRatings = [];
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const rates = await Rating.find({ product_id: product._id });
+      let total = 0;
+      let totalRate = 0;
+
+      if (rates.length > 0) {
+        rates.forEach((rate) => {
+          total = total + rate.rate;
+        });
+        totalRate = total / rates.length;
+      }
+      // Create a new object with product details and average rating
+      const productWithRating = {
+        _id: product._id,
+        name: product.name,
+        category: product.category,
+        subCategory: product.subCategory,
+        // Add other product fields as needed
+        averageRating: totalRate,
+        images:product.images,
+        price_after:product.price_after,
+        price_before:product.price_before,
+        brand:product.brand,
+      };
+
+      productsWithRatings.push(productWithRating);
+    }
+    res.status(200).json(productsWithRatings);
+  
+} catch (error) {
+  res.status(500).json({ success: false, message: "Internal Server Error" });
+
+  
+}
+    // .then((relatedProducts) => {
+    //   res.status(200).send(relatedProducts);
+    // })
+    // .catch((err) => {
+    //   res.status(500).send(err);
+    // });
+};
+
 
 module.exports.getProductsBySupCategory = (req, res, next) => {
   try {
@@ -77,7 +173,7 @@ module.exports.getProductsBySupCategory = (req, res, next) => {
       }
     );
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
     return res.json({
       status: false,
       message: "Error",
