@@ -1,24 +1,51 @@
 var joi = require("joi");
 var Types = require("mongoose").Types;
 
-exports.validation = function (schema, considerHeaders) {
-    if (considerHeaders === void 0) { considerHeaders = false; }
+// exports.validation = function (schema, considerHeaders) {
+//     if (considerHeaders === void 0) { considerHeaders = false; }
+//     return function (req, res, next) {
+//         var dataFromAllMethods = Object.assign({}, req.body, req.params, req.query);
+//         if (req.file || req.files) {
+//             dataFromAllMethods.file = req.file || req.files;
+//         }
+//         if (req.headers.authorization && considerHeaders) {
+//             dataFromAllMethods = { authorization: req.headers.authorization };
+//         }
+//         var validationResult = schema.validate(dataFromAllMethods, { abortEarly: false });
+//         if (validationResult.error) {
+//             return res.json({ message: "Validation Error", ERR: validationResult.error.details });
+//         }
+//         return next();
+//     };
+// };
+exports.validation = function (schema, considerHeaders = false) {
     return function (req, res, next) {
-        var dataFromAllMethods = Object.assign({}, req.body, req.params, req.query);
-        if (req.file || req.files) {
-            dataFromAllMethods.file = req.file || req.files;
-        }
-        if (req.headers.authorization && considerHeaders) {
-            dataFromAllMethods = { authorization: req.headers.authorization };
-        }
-        var validationResult = schema.validate(dataFromAllMethods, { abortEarly: false });
-        if (validationResult.error) {
-            return res.json({ message: "Validation Error", ERR: validationResult.error.details });
-        }
-        return next();
+      const dataFromAllMethods = Object.assign({}, req.body, req.params, req.query);
+      if (req.file || req.files) {
+        dataFromAllMethods.file = req.file || req.files;
+      }
+      if (req.headers.authorization && considerHeaders) {
+        dataFromAllMethods.authorization = req.headers.authorization;
+      }
+  
+      const validationResult = schema.validate(dataFromAllMethods, { abortEarly: false });
+      if (validationResult.error) {
+        const formattedErrors = {};
+  
+        validationResult.error.details.forEach((error) => {
+          const key = error.path[0];
+          const customErrorMessage = error.message.replace(/["']/g, ''); // Remove quotes from error message
+  
+          if (!formattedErrors[key]) {
+            formattedErrors[key] = customErrorMessage;
+          }
+        });
+  
+        return res.status(200).json({ success: false, errors: formattedErrors });
+      }
+      return next();
     };
-};
-
+  };
 var validateObjectId = function (value, helper) {
     return Types.ObjectId.isValid(value) ? true : helper.message('In-Valid object-Id from validation');
 };

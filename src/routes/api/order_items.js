@@ -16,10 +16,10 @@ router.delete('/:id',order_items_controller.Delete_order_item)
 router.put('/',order_items_controller.Update_many)
 router.put('/:id',order_items_controller.Update_order_item)
 
-router.post('/userorders',checkToken,order_items_controller.User_Admin_OView)
-router.post('/userreturns',checkToken,order_items_controller.User_Admin_RView)
+router.post('/userorders',checkToken([roles.user]),order_items_controller.User_Admin_OView)
+router.post('/userreturns',checkToken([roles.user]),order_items_controller.User_Admin_RView)
 
-router.get('/stat',checkToken,order_items_controller.stat)
+router.get('/stat',checkToken([roles.user]),order_items_controller.stat)
 
 router.post('/filter',order_items_controller.filter)
 

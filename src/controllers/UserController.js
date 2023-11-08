@@ -135,7 +135,7 @@ const login = async (req, res, next) => {
       });
     }
 
-    User.findOne({ $or: [{ email: email }, { password: password }] }).then(
+    User.findOne({ $or: [{ email: email }, { password: password }]}).then(
       (user) => {
         if (user) {
           bcrypt.compare(password, user.password, function (err, result) {
