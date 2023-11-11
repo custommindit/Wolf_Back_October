@@ -15,8 +15,8 @@ const SubCategorySchema = new Schema(
       type: Boolean,
     },
     Image: {
-      type: String,
-      required: true,
+      public_id: String,
+      secure_url: String,
     },
   },
   {

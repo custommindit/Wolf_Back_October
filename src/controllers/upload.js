@@ -25,7 +25,8 @@ const uploadFile = async (req, res) => {
       });
       await unlinkAsync(req.file.path);
       res.status(200).json({
-        url: data.url,
+        secure_url: data.secure_url,
+        public_id: data.public_id,
       });
     }
   } catch (error) {
@@ -44,11 +45,14 @@ const uploadFiles = async (req, res) => {
             folder: `${process.env.FOLDER_CLOUD_NAME}/images/`,
           });
           await unlinkAsync(file.path);
-          return data.url;
+          return {
+            secure_url: data.secure_url,
+            public_id: data.public_id,
+          };
         })
       );
 
-      res.status(200).json({ urls: urls });
+      res.status(200).json(urls);
     }
   } catch (error) {
     res.status(500);

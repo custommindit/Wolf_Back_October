@@ -58,7 +58,7 @@ module.exports.get_subcategory_by_id = async (req, res) => {
 
 module.exports.get_subcategory_by_main_category = async (req, res) => {
   const id = req.params.id;
-  SubCategory.find({ main_category: id, view: true })
+  SubCategory.find({ category: id, view: true })
     .then((e) => {
       res.status(200).json({
         response: e,

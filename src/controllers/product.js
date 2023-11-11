@@ -54,6 +54,7 @@ module.exports.getProductById = (req, res, next) => {
 
 module.exports.getProducts = (req, res, next) => {
   Product.find({})
+    .sort({ updatedAt: -1 })
     .populate({
       path: "category",
     })
@@ -199,6 +200,7 @@ module.exports.createProduct = async (req, res, next) => {
       desc: body.desc,
       description: body.description,
       quantity: body.quantity,
+      linked_products: body.linked_products,
       view: true,
     });
     const data = await product.save();

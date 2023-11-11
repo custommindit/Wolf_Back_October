@@ -26,8 +26,7 @@ router.post(
   upload.array("images"),
   product_controller.uplodaImageCloud
 );
-router.post("/create",  
-product_controller.createProduct);
+router.post("/create", product_controller.createProduct);
 
 const storage2 = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -64,8 +63,7 @@ router.post("/recomm", product_controller.recomm);
 
 router.get("/home_latest/:id", product_controller.getHomeRecents);
 
-router.get("/home_subcategory/:id",product_controller.gethomesublist);
-
+router.get("/home_subcategory/:id", product_controller.gethomesublist);
 
 router.post("/designatehotsale/:id", product_controller.hotSaleDesignateOne);
 router.post(
