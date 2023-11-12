@@ -54,7 +54,7 @@ module.exports.getProductById = (req, res, next) => {
 
 module.exports.getProducts = (req, res, next) => {
   Product.find({})
-    .sort({ updatedAt: -1 })
+    .sort({ createdAt: -1 })
     .populate({
       path: "category",
     })
@@ -646,15 +646,18 @@ module.exports.getProductBySubCategory2 = async (req, res) => {
     });
 };
 module.exports.UpdateViewProduct = async (req, res) => {
-  const body = req.body;
-  let _id = new mongoose.Types.ObjectId(req.params.id);
-  await Product.findOneAndUpdate({ _id: _id }, { $set: body }, { new: true })
-    .then((e) => {
-      return res.status(200).json(e);
-    })
-    .catch((err) => {
-      return res.json({ message: "Error" });
-    });
+  try {
+    const id = req.params.id;
+    const oldProduct = await Product.findOne({ _id: id });
+    const newProduct = await Product.findByIdAndUpdate(
+      { _id: id },
+      { $set: { view: !oldProduct.view } }
+    );
+
+    res.status(200).json(newProduct);
+  } catch (error) {
+    res.status(500).json({ message: "Some Error happend" });
+  }
 };
 
 module.exports.DeleteProduct = async (req, res) => {
