@@ -42,7 +42,7 @@ const upload2 = multer({ storage: storage2 });
 
 router.get("/", product_controller.getProducts);
 router.get("/:id", product_controller.getProductById);
-router.get("/:name", product_controller.searchProductsByName);
+router.get("/search/:name", product_controller.searchProductsByName);
 
 router.put(
   "/update_first_visit/:id",
