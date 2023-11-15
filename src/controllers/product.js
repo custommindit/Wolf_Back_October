@@ -216,8 +216,21 @@ module.exports.createProduct = async (req, res, next) => {
       linked_products: body.linked_products,
       view: true,
     });
-    const data = await product.save();
-    res.status(200).json(data);
+    const color = new Color({
+      color_name: body.color,
+      color_hex: body.color_hex,
+      sub_category: body.subCategory,
+    });
+    const brand = new Brand({
+      brand_name: body.brand,
+      sub_category: body.subCategory,
+    });
+    const colorRes = await color.save();
+    const brandRes = await brand.save();
+    const productRes = await product.save();
+    res
+      .status(200)
+      .json({ product: productRes, brand: brandRes, color: colorRes });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
