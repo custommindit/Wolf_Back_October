@@ -27,6 +27,7 @@ router.post(
   product_controller.uplodaImageCloud
 );
 router.post("/create", product_controller.createProduct);
+router.put("/:id", product_controller.editProduct);
 
 const storage2 = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -40,7 +41,7 @@ const storage2 = multer.diskStorage({
 const upload2 = multer({ storage: storage2 });
 
 router.get("/", product_controller.getProducts);
-//get last four products
+router.get("/:name", product_controller.searchProductsByName);
 
 router.put(
   "/update_first_visit/:id",
@@ -50,6 +51,7 @@ router.put(
 ////router.post('/excel', upload2.single('excel'), product_controller.getDataFromExcel)
 //router.post('/from_excel', product_controller.CreateProducts)
 
+router.get("/:id", product_controller.getProductById);
 router.put("/view/:id", product_controller.UpdateViewProduct);
 router.delete("/:id", product_controller.DeleteProduct);
 router.post("/search", product_controller.SearchByName);

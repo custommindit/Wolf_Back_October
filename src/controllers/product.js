@@ -68,6 +68,19 @@ module.exports.getProducts = (req, res, next) => {
       res.status(500).send(err);
     });
 };
+
+module.exports.searchProductsByName = async (req, res) => {
+  const name = req.params.name;
+  try {
+    const products = await Product.find({
+      name: { $regex: name, $options: "i" },
+    });
+    res.status(200).send(products);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
 /////////////get last four products
 module.exports.getLastFourProducts = async (req, res, next) => {
   try {
@@ -205,6 +218,18 @@ module.exports.createProduct = async (req, res, next) => {
     });
     const data = await product.save();
     res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports.editProduct = async (req, res) => {
+  const body = req.body;
+  const id = req.params.id;
+
+  try {
+    const data = await Product.updateOne({ _id: id }, { $set: { ...body } });
+    res.status(200).json(body);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

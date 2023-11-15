@@ -10,6 +10,7 @@ router.get(
 router.get("/main_subcategory/", subCategoryController.get_subCategory);
 router.get("/count/:id", subCategoryController.gettotalcount);
 
+router.get("/:id", subCategoryController.get_subcategory_by_id);
 router.put("/:id", subCategoryController.update_subcategory);
 
 module.exports = router;

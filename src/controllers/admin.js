@@ -14,6 +14,7 @@ const login = async (req, res, next) => {
 
     Admin.findOne({ $or: [{ email: email }, { password: password }] }).then(
       (admin) => {
+        console.log("admin= ", admin);
         if (admin) {
           bcrypt.compare(password, admin.password, function (err, result) {
             if (err) {
@@ -21,6 +22,7 @@ const login = async (req, res, next) => {
                 error: err,
               });
             }
+            console.log("result= ", result);
 
             if (result) {
               let token = jwt.sign(

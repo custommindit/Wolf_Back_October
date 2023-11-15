@@ -11,12 +11,14 @@ const viewProfile = (req, res, next) => {
   try {
     const id = req.body.decoded.id;
 
-    User.findById(id).select("-password").then((response) => {
-      res.json({
-        response,
-        success: true,
+    User.findById(id)
+      .select("-password")
+      .then((response) => {
+        res.json({
+          response,
+          success: true,
+        });
       });
-    });
   } catch (error) {
     res.json({
       success: false,
@@ -54,16 +56,16 @@ const signUp = async (req, res) => {
       first_name: body.first_name,
       last_name: body.last_name,
       telephone: body.telephone,
-      gender:body.gender,
+      gender: body.gender,
       ban: false,
-      viewed:[],
+      viewed: [],
       // role:body.role
     });
     user.save().then((response) => {
       res.json({
         success: true,
         message: "Signed up successfully",
-        email: response.email
+        email: response.email,
       });
     });
   } catch (error) {
@@ -83,7 +85,7 @@ const updateProfile = async (req, res) => {
       last_name: body.last_name,
       telephone: body.telephone,
     };
-    User.findByIdAndUpdate(id,  update ).then(() => {
+    User.findByIdAndUpdate(id, update).then(() => {
       res.json({
         success: true,
         message: "User updated successfully",
@@ -125,7 +127,7 @@ const login = async (req, res, next) => {
         message: "Id or password is invalid",
       });
     }
-///////////////////////////////////////////////////////////////////soft delete
+    ///////////////////////////////////////////////////////////////////soft delete
     // Check if the user is marked as deleted
     const user = await User.findOne({ email: email });
     if (user && user.isDeleted) {
@@ -135,7 +137,7 @@ const login = async (req, res, next) => {
       });
     }
 
-    User.findOne({ $or: [{ email: email }, { password: password }]}).then(
+    User.findOne({ $or: [{ email: email }, { password: password }] }).then(
       (user) => {
         if (user) {
           bcrypt.compare(password, user.password, function (err, result) {
@@ -147,7 +149,12 @@ const login = async (req, res, next) => {
 
             if (result) {
               let token = jwt.sign(
-                { email: user.email, id: user._id, name: user.first_name + " " + user.last_name,role:"user" },
+                {
+                  email: user.email,
+                  id: user._id,
+                  name: user.first_name + " " + user.last_name,
+                  role: "user",
+                },
                 process.env.JWT_KEY
               );
               res.json({
@@ -181,32 +188,31 @@ const login = async (req, res, next) => {
 /////pagination correction
 const getall = async (req, res) => {
   try {
-    if (req.body.decoded.admin)
-      User.find()
-        .select("-password")
-        .then((response) => {
-          res.json({
-            response,
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          res.json({
-            message: "An error Occured!",
-          });
-        });
-    else res.json({ message: "An error Occured!" });
+    // const users = await User.find();
+    const data = await User.aggregate([
+      {
+        $lookup: {
+          from: "order_items",
+          localField: "_id",
+          foreignField: "user_id",
+          as: "orders",
+        },
+      },
+    ]);
+    res.status(200).json(data);
   } catch (error) {
-    res.json({
-      message: "Error",
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
 const banUser = async (req, res) => {
   try {
     if (req.body.decoded.admin)
-      User.findByIdAndUpdate(req.params.id, { $set: { ban: true } }, { new: true })
+      User.findByIdAndUpdate(
+        req.params.id,
+        { $set: { ban: true } },
+        { new: true }
+      )
         .then((response) => {
           res.json({
             response,
@@ -229,7 +235,11 @@ const banUser = async (req, res) => {
 const unbanUser = async (req, res) => {
   try {
     if (req.body.decoded.admin)
-      User.findByIdAndUpdate(req.params.id, { $set: { ban: false } }, { new: true })
+      User.findByIdAndUpdate(
+        req.params.id,
+        { $set: { ban: false } },
+        { new: true }
+      )
         .then((response) => {
           res.json({
             response,
@@ -296,7 +306,10 @@ const view = async (req, res) => {
       { new: true }
     );
 
-    return res.json({ message: "Viewed array updated successfully", success: true, });
+    return res.json({
+      message: "Viewed array updated successfully",
+      success: true,
+    });
   } catch (error) {
     res.json({ success: false, message: "Error 500" });
   }
@@ -347,7 +360,7 @@ const changepassword = async (req, res) => {
   try {
     const id = req.body.decoded.id;
 
-    if (req.body.password===req.body.cPassword && req.body.password) {
+    if (req.body.password === req.body.cPassword && req.body.password) {
       const salt = genSaltSync(10);
       const password = hashSync(req.body.password, salt);
       User.findByIdAndUpdate(id, { password: password }).then(() => {
@@ -355,15 +368,16 @@ const changepassword = async (req, res) => {
           message: "Success",
         });
       });
-    }else{
-      res.status(200).json({ message: "password doesnt match comfirm password" });
+    } else {
+      res
+        .status(200)
+        .json({ message: "password doesnt match comfirm password" });
     }
   } catch (error) {
     console.error("Error updating document:", error);
     res.status(200).json({ message: "Error 500" });
   }
 };
-
 
 const softDeleteUser = async (req, res) => {
   try {
@@ -388,37 +402,44 @@ const softDeleteUser = async (req, res) => {
   }
 };
 ///////////////////////////////////////////////////////////social Login//////////////////////////////
-const CLIENT_ID =process.env.CLIENT_ID// Replace with your actual Google Client ID
+const CLIENT_ID = process.env.CLIENT_ID; // Replace with your actual Google Client ID
 const client = new OAuth2Client(CLIENT_ID);
 async function verifyIdToken(token) {
-
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: CLIENT_ID, // Specify the CLIENT_ID of your app that accesses the backend
-    });
-    const payload = ticket.getPayload();
-    return payload;
-
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: CLIENT_ID, // Specify the CLIENT_ID of your app that accesses the backend
+  });
+  const payload = ticket.getPayload();
+  return payload;
 }
 
-const googleSocialLogin=async(req,res,next)=>{
+const googleSocialLogin = async (req, res, next) => {
   const { idToken } = req.body;
   try {
-    const {name,email,email_verified,given_name,family_name} = await verifyIdToken(idToken);
+    const { name, email, email_verified, given_name, family_name } =
+      await verifyIdToken(idToken);
     // Process the decoded information as needed
     // ...
     // Respond with success or processed data
-    if(!email_verified){
-      return res.status(200).json({ success: false, error: 'in-valid email' })
+    if (!email_verified) {
+      return res.status(200).json({ success: false, error: "in-valid email" });
     }
-    const user = await User.findOne({email:email})
+    const user = await User.findOne({ email: email });
     //if user  exist in system
-    if(user){
-      if(user?.provider!=="google"){
-        return res.status(200).json({ success: false, error: `in-valid provider, provider is ${user.provider}`})
+    if (user) {
+      if (user?.provider !== "google") {
+        return res.status(200).json({
+          success: false,
+          error: `in-valid provider, provider is ${user.provider}`,
+        });
       }
       let token = jwt.sign(
-        { email: user.email, id: user._id, name: user.first_name + " " + user.last_name ,role:"user"},
+        {
+          email: user.email,
+          id: user._id,
+          name: user.first_name + " " + user.last_name,
+          role: "user",
+        },
         process.env.JWT_KEY
       );
       return res.json({
@@ -430,20 +451,25 @@ const googleSocialLogin=async(req,res,next)=>{
     //if user doesnt exist in system
     const randomPassword = Math.random().toString(36).slice(-8); // Generate a random 8-character password
     const salt = genSaltSync(10);
-    const hashedPassword =  hashSync(randomPassword, salt); // Hash the password
-     let newUser = new User({
-      username:name,
-      email:email,
+    const hashedPassword = hashSync(randomPassword, salt); // Hash the password
+    let newUser = new User({
+      username: name,
+      email: email,
       password: hashedPassword,
       first_name: given_name,
       last_name: family_name,
-      provider:"google",
+      provider: "google",
       ban: false,
-      viewed:[]
+      viewed: [],
     });
     await newUser.save();
     let token = jwt.sign(
-      { email: newUser.email, id: newUser._id, name: newUser.first_name + " " + newUser.last_name ,role:"user"},
+      {
+        email: newUser.email,
+        id: newUser._id,
+        name: newUser.first_name + " " + newUser.last_name,
+        role: "user",
+      },
       process.env.JWT_KEY
     );
     // return res.status(200).json({ success: true, message: 'Token verified successfully', payload });
@@ -451,39 +477,48 @@ const googleSocialLogin=async(req,res,next)=>{
       success: true,
       message: "Signed up successfully",
       // email: newUser.email,
-      token
+      token,
     });
   } catch (error) {
     // Handle verification error
-    console.error('Verification error:', error);
+    console.error("Verification error:", error);
     // return Respond with an error to the client
-    return res.status(200).json({ success: false, error: 'Unauthorized' ,error});
+    return res
+      .status(200)
+      .json({ success: false, error: "Unauthorized", error });
   }
-
-}
+};
 
 ///////////////////////////////////////////////////////////facebook Login//////////////////////////////
 
-const facebookSocailLogin=async(req,res,next)=>{
+const facebookSocailLogin = async (req, res, next) => {
   // console.log(req.body)
-  const { name,email,first_name,last_name } = req.body.response.data;
-  const {provider}=req.body.response
+  const { name, email, first_name, last_name } = req.body.response.data;
+  const { provider } = req.body.response;
   try {
     // const {name,email,provider,first_name,last_name} = await verifyIdToken(idToken);
     // Process the decoded information as needed
     // ...
     // Respond with success or processed data
-    if(provider!=="facebook"){
-      return res.status(200).json({ success: false, error: 'in-valid email' })
+    if (provider !== "facebook") {
+      return res.status(200).json({ success: false, error: "in-valid email" });
     }
-    const user = await User.findOne({email:email})
+    const user = await User.findOne({ email: email });
     //if user  exist in system
-    if(user){
-      if(user?.provider!=="facebook"){
-        return res.status(200).json({ success: false, error: `in-valid provider, provider is ${user.provider}`})
+    if (user) {
+      if (user?.provider !== "facebook") {
+        return res.status(200).json({
+          success: false,
+          error: `in-valid provider, provider is ${user.provider}`,
+        });
       }
       let token = jwt.sign(
-        { email: user.email, id: user._id, name: user.first_name + " " + user.last_name,role:"user" },
+        {
+          email: user.email,
+          id: user._id,
+          name: user.first_name + " " + user.last_name,
+          role: "user",
+        },
         process.env.JWT_KEY
       );
       return res.json({
@@ -495,20 +530,25 @@ const facebookSocailLogin=async(req,res,next)=>{
     //if user doesnt exist in system
     const randomPassword = Math.random().toString(36).slice(-8); // Generate a random 8-character password
     const salt = genSaltSync(10);
-    const hashedPassword =  hashSync(randomPassword, salt); // Hash the password
-     let newUser = new User({
-      username:name,
-      email:email,
+    const hashedPassword = hashSync(randomPassword, salt); // Hash the password
+    let newUser = new User({
+      username: name,
+      email: email,
       password: hashedPassword,
       first_name: first_name,
       last_name: last_name,
-      provider:"facebook",
+      provider: "facebook",
       ban: false,
-      viewed:[]
+      viewed: [],
     });
     await newUser.save();
     let token = jwt.sign(
-      { email: newUser.email, id: newUser._id, name: newUser.first_name + " " + newUser.last_name,role:"user" },
+      {
+        email: newUser.email,
+        id: newUser._id,
+        name: newUser.first_name + " " + newUser.last_name,
+        role: "user",
+      },
       process.env.JWT_KEY
     );
     // return res.status(200).json({ success: true, message: 'Token verified successfully', payload });
@@ -516,18 +556,17 @@ const facebookSocailLogin=async(req,res,next)=>{
       success: true,
       message: "Signed up successfully",
       // email: newUser.email,
-      token
+      token,
     });
   } catch (error) {
     // Handle verification error
-    console.error('Verification error:', error);
+    console.error("Verification error:", error);
     // return Respond with an error to the client
-    return res.status(200).json({ success: false, error: 'Unauthorized' ,error});
+    return res
+      .status(200)
+      .json({ success: false, error: "Unauthorized", error });
   }
-
-}
-
-
+};
 
 module.exports = {
   viewProfile,
@@ -544,5 +583,5 @@ module.exports = {
   unbanUser,
   softDeleteUser,
   googleSocialLogin,
-facebookSocailLogin
+  facebookSocailLogin,
 };
