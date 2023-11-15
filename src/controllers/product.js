@@ -193,6 +193,33 @@ module.exports.getProductsBySupCategory = (req, res, next) => {
   }
 };
 
+const setMutualLinkedProducts = async (product) => {
+  if (product.linked_products.length) {
+    try {
+      const products = product.linked;
+      let data = await Promise.all(
+        product.linked_products.map(async (id) => {
+          const linkedProduct = await Product.findOne({ _id: id });
+          linkedProduct.linked_products.push(product._id);
+          const res = await linkedProduct.save();
+          return res;
+        })
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+};
+
+const checkIfBrandExists = async (name) => {
+  try {
+    const count = await Brand.countDocuments({ brand_name: name });
+    return count !== 0;
+  } catch (error) {
+    return error;
+  }
+};
+
 module.exports.createProduct = async (req, res, next) => {
   const body = req.body;
   try {
@@ -221,16 +248,18 @@ module.exports.createProduct = async (req, res, next) => {
       color_hex: body.color_hex,
       sub_category: body.subCategory,
     });
-    const brand = new Brand({
-      brand_name: body.brand,
-      sub_category: body.subCategory,
-    });
-    const colorRes = await color.save();
-    const brandRes = await brand.save();
-    const productRes = await product.save();
-    res
-      .status(200)
-      .json({ product: productRes, brand: brandRes, color: colorRes });
+    await color.save();
+
+    let exist = await checkIfBrandExists(product.brand);
+    if (!exist) {
+      const brand = new Brand({
+        brand_name: body.brand,
+        sub_category: body.subCategory,
+      });
+      await brand.save();
+    }
+    await setMutualLinkedProducts(product);
+    res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -241,8 +270,28 @@ module.exports.editProduct = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const data = await Product.updateOne({ _id: id }, { $set: { ...body } });
-    res.status(200).json(body);
+    const product = await Product.findByIdAndUpdate(
+      { _id: id },
+      { $set: { ...body } }
+    );
+    await setMutualLinkedProducts(product);
+    if (body.color && body.color_hex) {
+      const color = new Color({
+        color_name: body.color,
+        color_hex: body.color_hex,
+        sub_category: body.subCategory || product.subCategory,
+      });
+      await color.save();
+    }
+    let exist = await checkIfBrandExists(product.brand);
+    if (!exist) {
+      const brand = new Brand({
+        brand_name: body.brand,
+        sub_category: body.subCategory,
+      });
+      await brand.save();
+    }
+    res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
