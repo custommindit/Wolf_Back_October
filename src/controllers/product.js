@@ -259,6 +259,7 @@ module.exports.createProduct = async (req, res, next) => {
       await brand.save();
     }
     await setMutualLinkedProducts(product);
+    await product.save();
     res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -291,6 +292,7 @@ module.exports.editProduct = async (req, res) => {
       });
       await brand.save();
     }
+    await product.save();
     res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
