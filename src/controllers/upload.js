@@ -59,7 +59,13 @@ const uploadFiles = async (req, res) => {
   }
 };
 
+const removeFile = async (public_id) => {
+  const res = await cloudinary.uploader.destroy(public_id);
+  return res;
+};
+
 module.exports = {
   uploadFile,
   uploadFiles,
+  removeFile,
 };
