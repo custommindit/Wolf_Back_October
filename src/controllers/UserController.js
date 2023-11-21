@@ -568,7 +568,19 @@ const facebookSocailLogin = async (req, res, next) => {
   }
 };
 
+ const totalNumOfUsers = async (req, res) => {
+  try {
+    // Find the total number of users
+    const totalNumOfUsers = await User.countDocuments();
+
+    res.json({ totalNumOfUsers });
+  } catch (error) {
+    console.error("Error in totalNumOfUsers:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 module.exports = {
+  totalNumOfUsers,
   viewProfile,
   signUp,
   updateProfile,
