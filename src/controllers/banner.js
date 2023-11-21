@@ -4,20 +4,29 @@ const { removeFile } = require("./upload");
 
 const create = async (req, res) => {
   const { category, img } = req.body;
-  const banner = new Banner({
-    category,
-    img,
-  });
-  banner.save();
-  res.status(200).json({ message: "success" });
+  try {
+    const banner = new Banner({
+      category: category || null,
+      img: img,
+    });
+    banner.save();
+    res.status(200).json(banner);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
 };
 
 const index = async (req, res) => {
   const id = req.query.categoryId;
   try {
     if (id) {
-      const banners = await Banner.find({ category: id });
-      res.status(200).json(banners);
+      if (id === "7483") {
+        const banner = await Banner.find({ category: null });
+        res.status(200).json(banner);
+      } else {
+        const banners = await Banner.find({ category: id });
+        res.status(200).json(banners);
+      }
     } else {
       const banners = await Banner.find({});
       res.status(200).json(banners);
@@ -41,7 +50,10 @@ const edit = async (req, res) => {
   const body = req.body;
   const { id } = req.params;
   try {
-    const banner = await Banner.updateOne({ _id: id }, { $set: { ...body } });
+    const banner = await Banner.updateOne(
+      { _id: id },
+      { $set: { ...body, category: body.category || null } }
+    );
     res.status(200).json(banner);
   } catch (error) {
     res.status(500).json(error.message);

@@ -85,7 +85,8 @@ const add_order_item = async (body, id, suppliers, email) => {
 };
 
 module.exports.Read_order_items = async (req, res) => {
-  await Order_items.find({ returnrequest: "none" })
+  Order_items.find({})
+    .sort({ createdAt: -1 })
     .then((e) => {
       return res.status(200).json(e);
     })
