@@ -315,3 +315,67 @@ module.exports.filter = async (req, res) => {
       return res.status(401).json({ error: err.message });
     });
 };
+
+module.exports.numOfOrdersWithinDay = async (req, res) => {
+  try {
+    // Get the current date
+    const currentDate = new Date();
+    
+    // Set the time to the beginning of the day (midnight)
+    currentDate.setHours(0, 0, 0, 0);
+
+    // Find orders created today
+    const numOfOrders = await Order_items.countDocuments({
+      createdAt: { $gte: currentDate },
+    });
+
+    res.json({ numOfOrders });
+  } catch (error) {
+    console.error("Error in numOfOrdersWithinDay:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports.totalPricesWithinDay = async (req, res) => {
+  try {
+    const currentDate = new Date();
+    
+    currentDate.setHours(0, 0, 0, 0);
+
+    const orders = await Order_items.find({
+      createdAt: { $gte: currentDate },
+    });
+
+    // Calculate total prices
+    const total_Prices_Today = orders.reduce((total, order) => total + parseInt(order.totalPrice), 0);
+
+    res.json({ total_Prices_Today });
+  } catch (error) {
+    console.error("Error in totalPricesWithinDay:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports.totalNumOfOrders = async (req, res) => {
+  try {
+    // Find the total number of orders
+    const totalNumOfOrders = await Order_items.countDocuments();
+
+    res.json({ totalNumOfOrders });
+  } catch (error) {
+    console.error("Error in totalNumOfOrders:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports.totalPrices = async (req, res) => {
+  try {
+    const orders = await Order_items.find();
+    const totalPrice = orders.reduce((total, order) => total + parseInt(order.totalPrice), 0);
+
+    res.json({ totalPrice });
+  } catch (error) {
+    console.error("Error in totalPriceOfAllOrders:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

@@ -28,6 +28,7 @@ router.post(
 );
 router.post("/create", product_controller.createProduct);
 router.put("/:id", product_controller.editProduct);
+router.get("/totalNumOfProducts", product_controller.totalNumOfProducts);
 
 const storage2 = multer.diskStorage({
   destination: function (req, file, cb) {

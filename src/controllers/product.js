@@ -988,3 +988,16 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
       return res.json({ message: err.message });
     });
 };
+
+
+module.exports.totalNumOfProducts = async (req, res) => {
+  try {
+    // Find the total number of products
+    const totalNumOfProducts = await Product.countDocuments();
+
+    res.json({ totalNumOfProducts });
+  } catch (error) {
+    console.error("Error in totalNumOfProducts:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

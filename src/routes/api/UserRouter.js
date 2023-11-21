@@ -11,10 +11,11 @@ const {
   login,
   getall,
   search,
-  view, viewed, changepassword, softDeleteUser, facebookSocailLogin, googleSocialLogin
+  view, viewed, changepassword, softDeleteUser, facebookSocailLogin, googleSocialLogin,totalNumOfUsers
 } = require("../../controllers/UserController");
 
 router.get("/view_profile", checkToken([roles.user]), viewProfile);
+router.get("/totalNumOfUsers", totalNumOfUsers);
 router.get("/", checkToken([roles.admin]), getall);
 router.post("/sign_up",validation(sign_up), signUp);
 router.post("/view", checkToken([roles.user]), view);
