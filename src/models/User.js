@@ -40,7 +40,9 @@ const userSchema = new Schema({
         type:String,
         default:"user",
         // required:true
-    }
+    },
+    wallet:{type:Number,default:0},
+    walletInvoiceID:{type:Number,default:0},
 }, { timeseries: true })
 
 userSchema.statics.isThisEmailUse = async function (email) {
