@@ -7,6 +7,7 @@ router.get("/numOfOrdersWithinDay",order_items_controller.numOfOrdersWithinDay);
 router.get("/totalPricesWithinDay",order_items_controller.totalPricesWithinDay);
 router.get("/totalNumOfOrders",order_items_controller.totalNumOfOrders);
 router.get("/totalPrices",order_items_controller.totalPrices);
+router.get("/totalPricesByMonthWithinYear",order_items_controller.totalPricesByMonthWithinYear);
 router.post(
   "/create",
   checkToken([roles.admin, roles.supplier, roles.user]),

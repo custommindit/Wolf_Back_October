@@ -379,3 +379,45 @@ module.exports.totalPrices = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+module.exports.totalPricesByMonthWithinYear = async (req, res) => {
+  try {
+    // Get the current year
+    const currentYear = new Date().getFullYear();
+
+    // Aggregate to calculate total prices by month within the year
+    const result = await Order_items.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: new Date(`${currentYear}-01-01`), $lt: new Date(`${currentYear + 1}-01-01`) },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          total: { $sum: { $toDouble: "$totalPrice" } },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+
+    // Calculate the total price for the entire year
+    const totalYearlyPrice = result.reduce((totalPrice, item) => totalPrice + item.total, 0);
+
+    // Prepare the result to have month names and corresponding total prices
+    const formattedResult = result.map(item => {
+      return {
+        month: new Date(`${currentYear}-${item._id}-01`).toLocaleString('en-US', { month: 'long' }),
+        totalPrice: item.total.toFixed(2), // Convert back to string with 2 decimal places if needed
+      };
+    });
+
+    res.json({ totalPricesByMonth: formattedResult, totalYearlyPrice });
+  } catch (error) {
+    console.error("Error in totalPricesByMonthWithinYear:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
