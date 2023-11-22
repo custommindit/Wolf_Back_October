@@ -159,7 +159,7 @@ module.exports.Update_order_item = async (req, res) => {
     return res.status(404).json({ error: "can't update order item not found" });
   }
   await Order_items.findByIdAndUpdate(_id, order_item, { new: true })
-    .then((e) => {
+    .then(async(e) => {
       ///   if(e.returnrequest==="accepted"|| e.returnrequest==="denied"){
       ///    emailController.returnsMail(e.firstName,e._id,e.returnrequest)}
       const returnedMonyTOUser =await User.findByIdAndUpdate({_id:oi.user_id},{wallet:wallet+oi.totalPrice})
