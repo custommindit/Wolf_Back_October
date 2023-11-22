@@ -3,6 +3,7 @@ const Cart = require("../models/cart");
 const Product = require("../models/product.js");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const User = require("../models/User.js");
 // const emailController = require("./ordermail");
 require("dotenv").config();
 
@@ -161,6 +162,8 @@ module.exports.Update_order_item = async (req, res) => {
     .then((e) => {
       ///   if(e.returnrequest==="accepted"|| e.returnrequest==="denied"){
       ///    emailController.returnsMail(e.firstName,e._id,e.returnrequest)}
+      const returnedMonyTOUser =await User.findByIdAndUpdate({_id:oi.user_id},{wallet:wallet+oi.totalPrice})
+      console.log(returnedMonyTOUser);
       return res.status(200).json(e);
     })
     .catch((err) => {
