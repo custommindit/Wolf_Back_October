@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const product = require("../models/product");
+const Order = require("../models/Order_items");
 const Rating = require("../models/rating");
 const { OAuth2Client } = require("google-auth-library");
 const bcrypt = require("bcrypt");
@@ -188,18 +189,37 @@ const login = async (req, res, next) => {
 /////pagination correction
 const getall = async (req, res) => {
   try {
-    // const users = await User.find();
-    const data = await User.aggregate([
-      {
-        $lookup: {
-          from: "order_items",
-          localField: "_id",
-          foreignField: "user_id",
-          as: "orders",
-        },
-      },
-    ]);
-    res.status(200).json(data);
+    let users = await User.find({});
+    users = await Promise.all(
+      users.map(async (user) => {
+        let sum = await Order.aggregate([
+          {
+            $match: {
+              user_id: user._id.toString(),
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              sum_val: {
+                $sum: {
+                  $toDouble: "$totalPrice",
+                },
+              },
+            },
+          },
+        ]);
+
+        return {
+          ...user._doc,
+          orders: await Order.find({ user_id: user._id }).countDocuments(),
+          totalSpent: sum?.["0"]?.sum_val || 0,
+          avg: 200,
+        };
+      })
+    );
+
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -568,7 +588,7 @@ const facebookSocailLogin = async (req, res, next) => {
   }
 };
 
- const totalNumOfUsers = async (req, res) => {
+const totalNumOfUsers = async (req, res) => {
   try {
     // Find the total number of users
     const totalNumOfUsers = await User.countDocuments();
@@ -579,6 +599,19 @@ const facebookSocailLogin = async (req, res, next) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+const show = async (req, res) => {
+  const { id } = req.params;
+  try {
+    console.log("id= ", id);
+    const user = await User.findOne({ _id: id });
+    console.log("user= ", user);
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
 module.exports = {
   totalNumOfUsers,
   viewProfile,
@@ -596,4 +629,5 @@ module.exports = {
   softDeleteUser,
   googleSocialLogin,
   facebookSocailLogin,
+  show,
 };

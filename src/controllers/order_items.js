@@ -56,7 +56,6 @@ module.exports.Create_order_item = async (req, res) => {
         return res.status(200).json(e);
       })
       .catch((err) => {
-        console.log("err", err);
         return res.json(err);
       });
   }
@@ -87,12 +86,11 @@ const add_order_item = async (body, id, suppliers, email) => {
 
 module.exports.Read_order_items = async (req, res) => {
   Order_items.find({})
-    .sort({ createdAt: -1 })
+    .sort({ updatedAt: -1 })
     .then((e) => {
       return res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
@@ -116,7 +114,6 @@ module.exports.Supplier_order_items = async (req, res) => {
       return res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
@@ -126,11 +123,9 @@ module.exports.Supplier_return_items = async (req, res) => {
     returnrequest: { $ne: "none" },
   })
     .then((e) => {
-      console.log(e);
       return res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
@@ -146,30 +141,44 @@ module.exports.Delete_order_item = async (req, res) => {
       return res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
 
-module.exports.Update_order_item = async (req, res) => {
-  const _id = new mongoose.Types.ObjectId(req.params.id);
-  const order_item = req.body;
-  const oi = await Order_items.findById(_id);
-  if (!oi) {
-    return res.status(404).json({ error: "can't update order item not found" });
+const handleWallet = async (oldOrder, order) => {
+  if (order.returnrequest !== "none") {
+    const { user_id } = order;
+    const user = await User.findOne({ _id: user_id });
+    const wallet = user?.wallet || 0;
+
+    if (order.returnrequest === "returned") {
+      await User.updateOne(
+        { _id: user_id },
+        { $set: { wallet: wallet + Number.parseInt(order.totalPrice) } }
+      );
+    } else if (
+      oldOrder.returnrequest === "returned" &&
+      order.returnrequest !== "returned"
+    ) {
+      await User.updateOne(
+        { _id: user_id },
+        { $set: { wallet: wallet - Number.parseInt(order.totalPrice) } }
+      );
+    }
   }
-  await Order_items.findByIdAndUpdate(_id, order_item, { new: true })
-    .then(async(e) => {
-      ///   if(e.returnrequest==="accepted"|| e.returnrequest==="denied"){
-      ///    emailController.returnsMail(e.firstName,e._id,e.returnrequest)}
-      const returnedMonyTOUser =await User.findByIdAndUpdate({_id:oi.user_id},{wallet:wallet+oi.totalPrice})
-      console.log(returnedMonyTOUser);
-      return res.status(200).json(e);
-    })
-    .catch((err) => {
-      console.log(err.message);
-      return res.status(401).json({ error: err.message });
-    });
+};
+
+module.exports.Update_order_item = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const oldOrder = await Order_items.findOne({ _id: id });
+    await Order_items.updateOne({ _id: id }, { $set: { ...req.body } });
+    const order = await Order_items.findOne({ _id: id });
+    await handleWallet(oldOrder, order);
+    res.status(200).json(order);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
 };
 module.exports.start_return = async (req, res) => {
   const _id = new mongoose.Types.ObjectId(req.params.id);
@@ -186,7 +195,6 @@ module.exports.start_return = async (req, res) => {
       return res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
@@ -197,7 +205,6 @@ module.exports.User_Orders = async (req, res) => {
       return res.status(200).json(response);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
@@ -208,7 +215,6 @@ module.exports.User_returns = async (req, res) => {
       return res.status(200).json(response);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
@@ -218,7 +224,6 @@ module.exports.returns = async (req, res) => {
       return res.status(200).json(response);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
@@ -231,7 +236,6 @@ module.exports.User_Admin_OView = async (req, res) => {
         return res.status(200).json(response);
       })
       .catch((err) => {
-        console.log(err.message);
         return res.status(401).json({ error: err.message });
       });
   } else {
@@ -241,13 +245,11 @@ module.exports.User_Admin_OView = async (req, res) => {
 module.exports.User_Admin_RView = async (req, res) => {
   if (req.body.decoded.admin) {
     const id = req.body.id;
-    console.log(id);
     await Order_items.find({ user_id: id, returnrequest: { $ne: "none" } })
       .then((response) => {
         return res.status(200).json(response);
       })
       .catch((err) => {
-        console.log(err.message);
         return res.status(401).json({ error: err.message });
       });
   } else {
@@ -267,13 +269,11 @@ module.exports.stat = async (req, res) => {
         returnrequest: "none",
       });
       const arr = [all, completed, cancelled];
-      console.log(arr);
       return res.json({
         response: arr,
       });
     }
   } catch (err) {
-    console.log(err);
     return res.json({ msg: "err" });
   }
 };
@@ -290,7 +290,6 @@ module.exports.Update_many = async (req, res) => {
       return res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
@@ -307,14 +306,11 @@ module.exports.filter = async (req, res) => {
   if (queryObject.status !== undefined) {
     query.status = queryObject.status;
   }
-  console.log(query);
   await Order_items.find(query)
     .then((e) => {
-      console.log(e);
       return res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       return res.status(401).json({ error: err.message });
     });
 };
@@ -323,7 +319,7 @@ module.exports.numOfOrdersWithinDay = async (req, res) => {
   try {
     // Get the current date
     const currentDate = new Date();
-    
+
     // Set the time to the beginning of the day (midnight)
     currentDate.setHours(0, 0, 0, 0);
 
@@ -342,7 +338,7 @@ module.exports.numOfOrdersWithinDay = async (req, res) => {
 module.exports.totalPricesWithinDay = async (req, res) => {
   try {
     const currentDate = new Date();
-    
+
     currentDate.setHours(0, 0, 0, 0);
 
     const orders = await Order_items.find({
@@ -350,7 +346,10 @@ module.exports.totalPricesWithinDay = async (req, res) => {
     });
 
     // Calculate total prices
-    const total_Prices_Today = orders.reduce((total, order) => total + parseInt(order.totalPrice), 0);
+    const total_Prices_Today = orders.reduce(
+      (total, order) => total + parseInt(order.totalPrice),
+      0
+    );
 
     res.json({ total_Prices_Today });
   } catch (error) {
@@ -374,7 +373,10 @@ module.exports.totalNumOfOrders = async (req, res) => {
 module.exports.totalPrices = async (req, res) => {
   try {
     const orders = await Order_items.find();
-    const totalPrice = orders.reduce((total, order) => total + parseInt(order.totalPrice), 0);
+    const totalPrice = orders.reduce(
+      (total, order) => total + parseInt(order.totalPrice),
+      0
+    );
 
     res.json({ totalPrice });
   } catch (error) {
@@ -382,7 +384,6 @@ module.exports.totalPrices = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 module.exports.totalPricesByMonthWithinYear = async (req, res) => {
   try {
@@ -393,7 +394,10 @@ module.exports.totalPricesByMonthWithinYear = async (req, res) => {
     const result = await Order_items.aggregate([
       {
         $match: {
-          createdAt: { $gte: new Date(`${currentYear}-01-01`), $lt: new Date(`${currentYear + 1}-01-01`) },
+          createdAt: {
+            $gte: new Date(`${currentYear}-01-01`),
+            $lt: new Date(`${currentYear + 1}-01-01`),
+          },
         },
       },
       {
@@ -408,12 +412,18 @@ module.exports.totalPricesByMonthWithinYear = async (req, res) => {
     ]);
 
     // Calculate the total price for the entire year
-    const totalYearlyPrice = result.reduce((totalPrice, item) => totalPrice + item.total, 0);
+    const totalYearlyPrice = result.reduce(
+      (totalPrice, item) => totalPrice + item.total,
+      0
+    );
 
     // Prepare the result to have month names and corresponding total prices
-    const formattedResult = result.map(item => {
+    const formattedResult = result.map((item) => {
       return {
-        month: new Date(`${currentYear}-${item._id}-01`).toLocaleString('en-US', { month: 'long' }),
+        month: new Date(`${currentYear}-${item._id}-01`).toLocaleString(
+          "en-US",
+          { month: "long" }
+        ),
         totalPrice: item.total.toFixed(2), // Convert back to string with 2 decimal places if needed
       };
     });

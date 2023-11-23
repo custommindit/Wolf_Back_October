@@ -32,12 +32,30 @@ module.exports.add_subcategory = async (req, res) => {
 //         res.status(404).json({ error: err.message })
 //     })
 // }
+
+const appendSuppliersAndStock = async (subCategories) => {
+  const appendedSubCategories = await Promise.all(
+    subCategories.map(async (subCategory) => {
+      const suppliers = await Product.find({
+        subCategory: subCategory._id,
+      }).distinct("supplier");
+      return {
+        ...subCategory._doc,
+        suppliers: suppliers.length,
+        stock: await Product.find({
+          subCategory: subCategory._id,
+        }).countDocuments(),
+      };
+    })
+  );
+  return appendedSubCategories;
+};
+
 module.exports.get_subCategory = async (req, res) => {
   try {
-    const subcategories = await SubCategory.find({}).populate({
-      path: "category",
-    });
-    res.json(subcategories);
+    let subCategories = await SubCategory.find({});
+    subCategories = await appendSuppliersAndStock(subCategories);
+    res.json(subCategories);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "An error occurred while fetching data" });

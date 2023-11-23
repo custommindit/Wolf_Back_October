@@ -3,19 +3,19 @@ const Admin = require("../models/admin");
 const User = require("../models/User");
 const supplier = require("../models/supplier");
 const roles = {
-  admin: 'admin',
-  user: 'user',
-  supplier: 'supplier'
+  admin: "admin",
+  user: "user",
+  supplier: "supplier",
 };
 Object.freeze(roles);
 
 const checkToken = (authorizedRoles = []) => {
   return async (req, res, next) => {
     try {
-      const token = req.get('authorization');
+      const token = req.get("authorization");
       if (token) {
-        const tokenParts = token.split(' ');
-        if (tokenParts.length === 2 && tokenParts[0] === 'Bearer') {
+        const tokenParts = token.split(" ");
+        if (tokenParts.length === 2 && tokenParts[0] === "Bearer") {
           const tokenString = tokenParts[1];
 
           jwt.verify(tokenString, process.env.JWT_KEY, async (err, decoded) => {
@@ -23,12 +23,11 @@ const checkToken = (authorizedRoles = []) => {
               console.error(err);
               return res.json({
                 success: 0,
-                message: 'Invalid Token...',
+                message: "Invalid Token...",
               });
             }
             req.body.decoded = decoded;
 
-            console.log(decoded);
             let user;
             if (decoded.role === roles.admin) {
               user = await Admin.findById(decoded.id);
@@ -43,13 +42,13 @@ const checkToken = (authorizedRoles = []) => {
             if (!user) {
               return res.json({
                 success: 0,
-                message: 'User Not Exist...',
+                message: "User Not Exist...",
               });
             }
             if (!authorizedRoles.includes(user.role)) {
               return res.json({
                 success: 0,
-                message: 'Not Authorized User To Access Here...',
+                message: "Not Authorized User To Access Here...",
               });
             }
             next();
@@ -57,20 +56,20 @@ const checkToken = (authorizedRoles = []) => {
         } else {
           return res.json({
             success: 0,
-            message: 'Invalid Token Format',
+            message: "Invalid Token Format",
           });
         }
       } else {
         return res.json({
           success: 0,
-          message: 'Access Denied! Unauthorized User',
+          message: "Access Denied! Unauthorized User",
         });
       }
     } catch (error) {
       console.error(error);
       return res.status(500).json({
         success: 0,
-        message: 'Internal Server Error',
+        message: "Internal Server Error",
       });
     }
   };
@@ -86,7 +85,7 @@ module.exports = {
 //     let token = req.get("authorization");
 //     if (token) {
 //       token = token.slice(7);
-      
+
 //       jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
 //         if (err) {
 //           console.log(err);
@@ -130,7 +129,7 @@ module.exports = {
 //     let token = req.get("authorization");
 //     if (token) {
 //       token = token.slice(7);
-      
+
 //       jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
 //         if (err) {
 //           console.log(err);

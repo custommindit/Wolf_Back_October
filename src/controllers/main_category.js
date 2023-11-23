@@ -21,22 +21,37 @@ module.exports.add_mainCategory = async (req, res) => {
       return res.status(200).json({ message: "Category Created Successfuly" });
     })
     .catch((err) => {
-      console.log(err.message);
       res.status(401).json({ error: err.message });
     });
 };
 
-module.exports.get_mainCategory = async (req, res) => {
-await MainCategory.find({view: true})
-.then(e => {
-    res.status(200).json({
-        response: e
+const appendStockAndSuppliers = async (categories) => {
+  const categoriesWithAppendedItems = await Promise.all(
+    categories.map(async (category) => {
+      const suppliers = await Product.find({
+        category: category._id,
+      }).distinct("supplier");
+      return {
+        ...category._doc,
+        suppliers: suppliers.length,
+        stock: await Product.find({
+          category: category._id,
+        }).countDocuments(),
+      };
     })
-}).catch(err => {
-    console.log(err.message)
-    res.status(404).json({ error: err.message })
-})
-}
+  );
+  return categoriesWithAppendedItems;
+};
+
+module.exports.get_mainCategory = async (req, res) => {
+  try {
+    let categories = await MainCategory.find({});
+    categories = await appendStockAndSuppliers(categories);
+    res.status(200).json({ response: categories });
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
 
 // module.exports.get_mainCategory = async (req, res) => {
 //   try {
@@ -83,7 +98,6 @@ module.exports.get_mainCategory_by_id = async (req, res) => {
       res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       res.status(401).json({ error: err.message });
     });
 };
@@ -96,7 +110,6 @@ module.exports.update_mainCategory = async (req, res) => {
       res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       res.status(401).json({ error: err.message });
     });
 };
@@ -113,7 +126,6 @@ module.exports.viewMainCategory = async (req, res) => {
       });
     })
     .catch((err) => {
-      console.log(err.message);
       res.status(404).json({ error: err.message });
     });
 };
@@ -130,7 +142,6 @@ module.exports.hiddenMainCategory = async (req, res) => {
       });
     })
     .catch((err) => {
-      console.log(err.message);
       res.status(404).json({ error: err.message });
     });
 };
@@ -142,7 +153,6 @@ module.exports.delete_mainCategory = async (req, res) => {
       res.status(200).json(e);
     })
     .catch((err) => {
-      console.log(err.message);
       res.status(401).json({ error: err.message });
     });
 };
