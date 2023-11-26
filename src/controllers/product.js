@@ -44,7 +44,6 @@ module.exports.getProductById = (req, res, next) => {
       });
     }
   } catch (error) {
-    // console.log(error.message);
     return res.json({
       status: false,
       message: "Error",
@@ -185,7 +184,6 @@ module.exports.getProductsBySupCategory = (req, res, next) => {
       }
     );
   } catch (error) {
-    // console.log(error.message);
     return res.json({
       status: false,
       message: "Error",
@@ -271,11 +269,11 @@ module.exports.editProduct = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const product = await Product.findByIdAndUpdate(
-      { _id: id },
-      { $set: { ...body } }
-    );
+    await Product.updateOne({ _id: id }, { $set: { ...body } });
+    const product = await Product.findOne({ _id: id });
+
     await setMutualLinkedProducts(product);
+
     if (body.color && body.color_hex) {
       const color = new Color({
         color_name: body.color,
@@ -292,7 +290,7 @@ module.exports.editProduct = async (req, res) => {
       });
       await brand.save();
     }
-    await product.save();
+
     res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -387,7 +385,6 @@ module.exports.uplodaImage = async (req, res, next) => {
     if (response.dressing) {
       try {
         const responseData = await MakeRequest(vrprop, response.imageSrc[0]);
-        console.log("MakeRequest Response:", responseData);
 
         if (JSON.parse(responseData).success) {
           const updatedProduct = await Product.findOneAndUpdate(
@@ -395,8 +392,6 @@ module.exports.uplodaImage = async (req, res, next) => {
             { garment_id: JSON.parse(responseData).garment_id },
             { new: true }
           );
-
-          console.log("Updated Product:", updatedProduct);
 
           return res.json({
             response: updatedProduct,
@@ -508,7 +503,6 @@ module.exports.uplodaImageCloud = async (req, res, next) => {
     if (response.dressing) {
       try {
         const responseData = await MakeRequest(vrprop, response.imageSrc[0]);
-        console.log("MakeRequest Response:", responseData);
 
         if (JSON.parse(responseData).success) {
           const updatedProduct = await Product.findOneAndUpdate(
@@ -516,8 +510,6 @@ module.exports.uplodaImageCloud = async (req, res, next) => {
             { garment_id: JSON.parse(responseData).garment_id },
             { new: true }
           );
-
-          console.log("Updated Product:", updatedProduct);
 
           return res.json({
             response: updatedProduct,
@@ -977,7 +969,6 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
         });
       }
       const count = await Product.count(query);
-      console.log("Hello", count); ///prints but doesn't return
       return res.json({
         response: e,
         rates: rates1,
@@ -988,7 +979,6 @@ module.exports.getProductBySubCategory2filter = async (req, res) => {
       return res.json({ message: err.message });
     });
 };
-
 
 module.exports.totalNumOfProducts = async (req, res) => {
   try {
