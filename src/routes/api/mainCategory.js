@@ -3,8 +3,9 @@ const { checkToken, roles } = require("../../auth/token_validation");
 const mainCategoryController = require("../../controllers/main_category");
 
 router.post("/create", mainCategoryController.add_mainCategory);
-router.get("/",mainCategoryController.get_mainCategory);
-router.get("/:id",mainCategoryController.get_mainCategory_by_id);
+router.get("/", mainCategoryController.get_mainCategory);
+router.get("/search", mainCategoryController.search);
+router.get("/:id", mainCategoryController.get_mainCategory_by_id);
 router.put("/update/:id", mainCategoryController.update_mainCategory);
 router.put("/view/:id", mainCategoryController.viewMainCategory);
 router.put("/hidden/:id", mainCategoryController.hiddenMainCategory);

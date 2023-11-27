@@ -22,17 +22,6 @@ module.exports.add_subcategory = async (req, res) => {
     });
 };
 
-// module.exports.get_subcategory = async (req, res) => {
-//     SubCategory.find().then(e => {
-//         res.status(200).json({
-//             response: e
-//         })
-//     }).catch(err => {
-//         console.log(err.message)
-//         res.status(404).json({ error: err.message })
-//     })
-// }
-
 const appendSuppliersAndStock = async (subCategories) => {
   const appendedSubCategories = await Promise.all(
     subCategories.map(async (subCategory) => {
@@ -153,4 +142,16 @@ module.exports.gettotalcount = async (req, res) => {
     .catch((err) => {
       return res.json({ success: false, count: 0 });
     });
+};
+
+module.exports.search = async (req, res) => {
+  const name = req.query.name;
+  try {
+    const subCategories = await SubCategory.find({
+      name: { $regex: name, $options: "i" },
+    });
+    res.status(200).json(subCategories);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
 };

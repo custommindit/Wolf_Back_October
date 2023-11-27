@@ -42,8 +42,10 @@ const storage2 = multer.diskStorage({
 const upload2 = multer({ storage: storage2 });
 
 router.get("/", product_controller.getProducts);
+
+router.get("/search", product_controller.searchProductsByName);
+
 router.get("/:id", product_controller.getProductById);
-router.get("/search/:name", product_controller.searchProductsByName);
 
 router.put(
   "/update_first_visit/:id",
@@ -55,7 +57,7 @@ router.put(
 
 router.put("/view/:id", product_controller.UpdateViewProduct);
 router.delete("/:id", product_controller.DeleteProduct);
-router.post("/search", product_controller.SearchByName);
+// router.post("/search", product_controller.SearchByName);
 router.post("/searchpage", product_controller.SearchByNameBulk);
 //router.post('/searchpagefilter', product_controller.searchProductfilter)
 router.post("/cart", product_controller.cart);

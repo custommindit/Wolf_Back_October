@@ -53,44 +53,6 @@ module.exports.get_mainCategory = async (req, res) => {
   }
 };
 
-// module.exports.get_mainCategory = async (req, res) => {
-//   try {
-//     // const categoryStock = await Product.aggregate([
-//     //   {
-//     //     $group: {
-//     //       _id: "$category", // Group products by category
-//     //       totalStock: { $sum: "$quantity.OS" }, // Calculate the total stock for each category
-//     //       suppliers: { $addToSet: "$supplier" }, // Collect unique suppliers in each category
-//     //     },
-//     //   },
-//     //   {
-//     //     $lookup: {
-//     //       from: "maincategories", // The name of the collection to lookup
-//     //       localField: "_id",
-//     //       foreignField: "_id",
-//     //       as: "categoryDetails",
-//     //     },
-//     //   },
-//     //   {
-//     //     $unwind: "$categoryDetails",
-//     //   },
-//     //   {
-//     //     $project: {
-//     //       // categoryID: '$categoryDetails._id',
-//     //       name: "$categoryDetails.name",
-//     //       totalStock: 1,
-//     //       numSuppliers: { $size: "$suppliers" }, // Count the number of unique suppliers
-//     //     },
-//     //   },
-//     // ]);
-//     const categories = await MainCategory.find({});
-
-//     res.json([...categories]);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "An error occurred while fetching data" });
-//   }
-// };
 module.exports.get_mainCategory_by_id = async (req, res) => {
   const _id = new mongoose.Types.ObjectId(req.params.id);
   await MainCategory.findById(_id)
@@ -155,4 +117,17 @@ module.exports.delete_mainCategory = async (req, res) => {
     .catch((err) => {
       res.status(401).json({ error: err.message });
     });
+};
+
+module.exports.search = async (req, res) => {
+  const name = req.query.name;
+  console.log("search");
+  try {
+    const categories = await MainCategory.find({
+      name: { $regex: name, $options: "i" },
+    });
+    res.status(200).json({ response: categories });
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
 };

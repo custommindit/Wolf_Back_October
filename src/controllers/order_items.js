@@ -295,24 +295,82 @@ module.exports.Update_many = async (req, res) => {
 };
 
 module.exports.filter = async (req, res) => {
-  const queryObject = req.body.query;
-  var query = { returnrequest: "none" };
-  if (queryObject.month !== undefined) {
-    const [month, year] = queryObject.month.split("/");
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
-    query.createdAt = { $gte: startDate, $lte: endDate };
+  const date = req.query.date;
+  const now = Date.now();
+  let day = new Date(now).getDate();
+  let month = new Date(now).getMonth();
+  let year = new Date(now).getFullYear();
+  try {
+    if (date === "24 Hours") {
+      if (day - 1 <= 0) {
+        month--;
+      } else {
+        day--;
+      }
+      const orders = await Order_items.find({
+        createdAt: {
+          $gte: new Date(year, month, day),
+          $lte: now,
+        },
+      }).sort({ updatedAt: -1 });
+      res.status(200).json(orders);
+    } else if (date === "7 Days") {
+      if (day - 7 <= 0) {
+        month--;
+        const offset = day - 7 - 1;
+        day = 30 + offset;
+      } else {
+        day -= 7;
+      }
+      const orders = await Order_items.find({
+        createdAt: {
+          $gte: new Date(year, month, day - 7),
+          $lte: now,
+        },
+      }).sort({ updatedAt: -1 });
+      res.status(200).json(orders);
+    } else if (date === "30 Days") {
+      const orders = await Order_items.find({
+        createdAt: {
+          $gte: new Date(year, month - 1, day),
+          $lte: now,
+        },
+      }).sort({ updatedAt: -1 });
+      res.status(200).json(orders);
+    } else if (date === "12 Months") {
+      const orders = await Order_items.find({
+        createdAt: {
+          $gte: new Date(year - 1, month, day),
+          $lte: now,
+        },
+      }).sort({ updatedAt: -1 });
+      res.status(200).json(orders);
+    } else {
+      const orders = await Order_items.find({}).sort({ updatedAt: -1 });
+      res.status(200).json(orders);
+    }
+  } catch (error) {
+    res.status(500).json(error.message);
   }
-  if (queryObject.status !== undefined) {
-    query.status = queryObject.status;
-  }
-  await Order_items.find(query)
-    .then((e) => {
-      return res.status(200).json(e);
-    })
-    .catch((err) => {
-      return res.status(401).json({ error: err.message });
-    });
+
+  // const queryObject = req.body.query;
+  // var query = { returnrequest: "none" };
+  // if (queryObject.month !== undefined) {
+  //   const [month, year] = queryObject.month.split("/");
+  //   const startDate = new Date(year, month - 1, 1);
+  //   const endDate = new Date(year, month, 0);
+  //   query.createdAt = { $gte: startDate, $lte: endDate };
+  // }
+  // if (queryObject.status !== undefined) {
+  //   query.status = queryObject.status;
+  // }
+  // await Order_items.find(query)
+  //   .then((e) => {
+  //     return res.status(200).json(e);
+  //   })
+  //   .catch((err) => {
+  //     return res.status(401).json({ error: err.message });
+  //   });
 };
 
 module.exports.numOfOrdersWithinDay = async (req, res) => {

@@ -69,11 +69,19 @@ module.exports.getProducts = (req, res, next) => {
 };
 
 module.exports.searchProductsByName = async (req, res) => {
-  const name = req.params.name;
+  const name = req.query.name;
+  const supplier = req.query.supplier;
   try {
-    const products = await Product.find({
-      name: { $regex: name, $options: "i" },
-    });
+    let products = [];
+    if (name) {
+      products = await Product.find({
+        name: { $regex: name, $options: "i" },
+      });
+    } else if (supplier) {
+      products = await Product.find({
+        supplier: { $regex: supplier, $options: "i" },
+      });
+    }
     res.status(200).send(products);
   } catch (error) {
     res.status(500).send(error.message);

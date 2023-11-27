@@ -280,33 +280,33 @@ const unbanUser = async (req, res) => {
 };
 
 /////pagination correction
-const search = async (req, res) => {
-  try {
-    console.log(req.body);
+// const search = async (req, res) => {
+//   try {
+//     console.log(req.body);
 
-    if (req.body.decoded.admin) {
-      User.find({
-        email: { $regex: ".*" + req.body.query + ".*", $options: "i" },
-      })
-        .select("-password")
-        .then((response) => {
-          res.json({
-            response,
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          res.json({
-            message: "An error Occured!",
-          });
-        });
-    } else res.json({ message: "An error Occured!" });
-  } catch (error) {
-    res.json({
-      message: "Error 500",
-    });
-  }
-};
+//     if (req.body.decoded.admin) {
+//       User.find({
+//         email: { $regex: ".*" + req.body.query + ".*", $options: "i" },
+//       })
+//         .select("-password")
+//         .then((response) => {
+//           res.json({
+//             response,
+//           });
+//         })
+//         .catch((error) => {
+//           console.log(error);
+//           res.json({
+//             message: "An error Occured!",
+//           });
+//         });
+//     } else res.json({ message: "An error Occured!" });
+//   } catch (error) {
+//     res.json({
+//       message: "Error 500",
+//     });
+//   }
+// };
 
 const view = async (req, res) => {
   try {
@@ -612,6 +612,18 @@ const show = async (req, res) => {
   }
 };
 
+const search = async (req, res) => {
+  const name = req.query.name;
+  try {
+    const users = await User.find({
+      username: { $regex: name, $options: "i" },
+    });
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
 module.exports = {
   totalNumOfUsers,
   viewProfile,
@@ -620,7 +632,6 @@ module.exports = {
   deleteProfile,
   login,
   getall,
-  search,
   view,
   viewed,
   changepassword,
@@ -630,4 +641,5 @@ module.exports = {
   googleSocialLogin,
   facebookSocailLogin,
   show,
+  search,
 };

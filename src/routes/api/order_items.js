@@ -3,11 +3,20 @@ const order_items_controller = require("../../controllers/order_items");
 const { checkToken, roles } = require("../../auth/token_validation");
 
 const router = Router();
-router.get("/numOfOrdersWithinDay",order_items_controller.numOfOrdersWithinDay);
-router.get("/totalPricesWithinDay",order_items_controller.totalPricesWithinDay);
-router.get("/totalNumOfOrders",order_items_controller.totalNumOfOrders);
-router.get("/totalPrices",order_items_controller.totalPrices);
-router.get("/totalPricesByMonthWithinYear",order_items_controller.totalPricesByMonthWithinYear);
+router.get(
+  "/numOfOrdersWithinDay",
+  order_items_controller.numOfOrdersWithinDay
+);
+router.get(
+  "/totalPricesWithinDay",
+  order_items_controller.totalPricesWithinDay
+);
+router.get("/totalNumOfOrders", order_items_controller.totalNumOfOrders);
+router.get("/totalPrices", order_items_controller.totalPrices);
+router.get(
+  "/totalPricesByMonthWithinYear",
+  order_items_controller.totalPricesByMonthWithinYear
+);
 router.post(
   "/create",
   checkToken([roles.admin, roles.supplier, roles.user]),
@@ -18,6 +27,8 @@ router.get(
   checkToken([roles.admin, roles.supplier, roles.user]),
   order_items_controller.Read_order_items
 ); //([roles.admin,roles.supplier])
+
+router.get("/filter", order_items_controller.filter);
 
 router.get(
   "/:id",
@@ -67,8 +78,5 @@ router.post(
 );
 
 router.get("/stat", checkToken([roles.user]), order_items_controller.stat);
-
-router.post("/filter", order_items_controller.filter);
-
 
 module.exports = router;

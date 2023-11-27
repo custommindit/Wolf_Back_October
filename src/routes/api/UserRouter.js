@@ -10,7 +10,6 @@ const {
   deleteProfile,
   login,
   getall,
-  search,
   view,
   viewed,
   changepassword,
@@ -19,15 +18,17 @@ const {
   googleSocialLogin,
   totalNumOfUsers,
   show,
+  search,
 } = require("../../controllers/UserController");
 
+router.get("/", checkToken([roles.admin]), getall);
+router.get("/search", checkToken([roles.admin]), search);
 router.get("/view_profile", checkToken([roles.user]), viewProfile);
 router.get("/totalNumOfUsers", totalNumOfUsers);
-router.get("/", checkToken([roles.admin]), getall);
 router.post("/sign_up", validation(sign_up), signUp);
 router.post("/view", checkToken([roles.user]), view);
 router.get("/viewed", checkToken([roles.user]), viewed);
-router.post("/search", checkToken([roles.user]), search);
+// router.post("/search", checkToken([roles.user]), search);
 router.post("/login", login);
 router.patch("/update_profile", checkToken([roles.user]), updateProfile);
 router.delete("/delete_profile", checkToken([roles.user]), deleteProfile);
