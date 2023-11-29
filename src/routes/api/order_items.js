@@ -79,4 +79,6 @@ router.post(
 
 router.get("/stat", checkToken([roles.user]), order_items_controller.stat);
 
+router.get("/customer/:id", order_items_controller.show);
+
 module.exports = router;

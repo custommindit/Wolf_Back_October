@@ -492,3 +492,15 @@ module.exports.totalPricesByMonthWithinYear = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+module.exports.show = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const orders = await Order_items.find({ user_id: id }).sort({
+      updateAt: -1,
+    });
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};

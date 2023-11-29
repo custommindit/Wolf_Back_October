@@ -603,9 +603,7 @@ const totalNumOfUsers = async (req, res) => {
 const show = async (req, res) => {
   const { id } = req.params;
   try {
-    console.log("id= ", id);
     const user = await User.findOne({ _id: id });
-    console.log("user= ", user);
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json(error.message);
