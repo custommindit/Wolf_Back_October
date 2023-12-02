@@ -45,8 +45,6 @@ router.get("/", product_controller.getProducts);
 
 router.get("/search", product_controller.searchProductsByName);
 
-router.get("/:id", product_controller.getProductById);
-
 router.put(
   "/update_first_visit/:id",
   product_controller.UpdateFirstVisitProduct
@@ -82,5 +80,10 @@ router.post(
   "/category2filter/:id/:page",
   product_controller.getProductBySubCategory2filter
 );
+
+router.get("/filter/:field", product_controller.filter);
+// router.get("/filter/updatedAt", product_controller.filter);
+
+router.get("/:id", product_controller.getProductById);
 
 module.exports = router;

@@ -38,7 +38,6 @@ const checkToken = (authorizedRoles = []) => {
             if (decoded.role === roles.user) {
               user = await User.findById(decoded.id);
             }
-            console.log(user);
             if (!user) {
               return res.json({
                 success: 0,

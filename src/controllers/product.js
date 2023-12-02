@@ -999,3 +999,31 @@ module.exports.totalNumOfProducts = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+module.exports.filter = async (req, res) => {
+  const { from, to } = req.query;
+  const field = req.params;
+  const dateFrom = new Date(from);
+  const dateTo = new Date(to);
+
+  try {
+    const products = await Product.find({
+      $and: [
+        {
+          [field]: {
+            $gte: dateFrom,
+          },
+        },
+        {
+          [field]: {
+            $lte: dateTo,
+          },
+        },
+      ],
+    });
+
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};

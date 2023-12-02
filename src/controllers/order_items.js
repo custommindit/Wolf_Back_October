@@ -168,12 +168,165 @@ const handleWallet = async (oldOrder, order) => {
   }
 };
 
+const addOrderItemsToStock = async (order) => {
+  let status = true;
+  await Promise.all(
+    order.products.map(async (product) => {
+      const oldProduct = await Product.findOne({ _id: product.product_id });
+      await Product.updateOne(
+        { _id: product.product_id },
+        {
+          $set: {
+            quantity: {
+              [product.size]:
+                oldProduct.quantity[product.size] +
+                Number.parseInt(product.quantity),
+            },
+          },
+        }
+      );
+    })
+  );
+  return status;
+};
+
+const subtractOrderItemsFromStock = async (order) => {
+  let status = true;
+  await Promise.all(
+    order.products.map(async (product) => {
+      const oldProduct = await Product.findOne({ _id: product.product_id });
+      if (
+        oldProduct.quantity[product.size] - Number.parseInt(product.quantity) <
+        1
+      ) {
+        status = false;
+      } else {
+        await Product.updateOne(
+          { _id: product.product_id },
+          {
+            $set: {
+              quantity: {
+                [product.size]:
+                  oldProduct.quantity[product.size] -
+                  Number.parseInt(product.quantity),
+              },
+            },
+          }
+        );
+      }
+    })
+  );
+  return status;
+};
+const handleReplaceRequest = async (oldOrder, order) => {
+  const REQUESTED = "requested";
+  const WAITING_FOR_PICK_UP = "waiting for pick up";
+  const PICKED_UP = "picked up";
+  const REPLACED = "replaced";
+  let status = true;
+
+  if (order.replacerequest === REQUESTED) {
+    if (
+      oldOrder.replacerequest === WAITING_FOR_PICK_UP ||
+      oldOrder.replacerequest === PICKED_UP
+    ) {
+      return await addOrderItemsToStock(order);
+    }
+  } else if (order.replacerequest === WAITING_FOR_PICK_UP) {
+    if (
+      oldOrder.replacerequest === REQUESTED ||
+      oldOrder.replacerequest === REPLACED
+    ) {
+      return await subtractOrderItemsFromStock(order);
+    }
+  } else if (order.replacerequest === PICKED_UP) {
+    if (
+      oldOrder.replacerequest === REQUESTED ||
+      oldOrder.replacerequest === REPLACED
+    ) {
+      return await subtractOrderItemsFromStock(order);
+    }
+  } else if (order.replacerequest === REPLACED) {
+    if (
+      oldOrder.replacerequest === WAITING_FOR_PICK_UP ||
+      oldOrder.replacerequest === PICKED_UP
+    ) {
+      return await addOrderItemsToStock(order);
+    }
+  }
+  return status;
+};
+
+const handleReturnRequest = async (oldOrder, order) => {
+  const REQUESTED = "requested";
+  const WAITING_FOR_PICK_UP = "waiting for pick up";
+  const PICKED_UP = "picked up";
+  const RETURNED = "returned";
+  let status = true;
+
+  if (order.returnrequest === RETURNED && oldOrder.returnrequest !== RETURNED) {
+    return await addOrderItemsToStock(order);
+  } else if (
+    order.returnrequest !== RETURNED &&
+    oldOrder.returnrequest === RETURNED
+  ) {
+    return await subtractOrderItemsFromStock(order);
+  }
+  return status;
+};
+
+const handleBuyRequest = async (oldOrder, order) => {
+  // status: processing, shipped, delivered, cancelled
+  const PROCESSING = "processing";
+  const SHIPPED = "shipped";
+  const DELIVERED = "delivered";
+  const CANCELLED = "cancelled";
+  let status = true;
+
+  if (order.status === PROCESSING) {
+    if (oldOrder.status === SHIPPED || oldOrder.status === DELIVERED) {
+      return await addOrderItemsToStock(order);
+    }
+  } else if (order.status === SHIPPED) {
+    if (oldOrder.status === PROCESSING || oldOrder.status === CANCELLED) {
+      return await subtractOrderItemsFromStock(order);
+    }
+  } else if (order.status === DELIVERED) {
+    if (oldOrder.status === PROCESSING || oldOrder.status === CANCELLED) {
+      return await subtractOrderItemsFromStock(order);
+    }
+  } else if (order.status === CANCELLED) {
+    if (oldOrder.status === SHIPPED || oldOrder.status === DELIVERED) {
+      return await addOrderItemsToStock(order);
+    }
+  }
+  return status;
+};
+
+const handleOrderStatus = async (oldOrder, order) => {
+  if (order.replacerequest !== "none") {
+    // Replace Request
+    return await handleReplaceRequest(oldOrder, order);
+  } else if (order.returnrequest !== "none") {
+    // Return Request
+    return await handleReturnRequest(oldOrder, order);
+  } else {
+    // Buy Request
+    return await handleBuyRequest(oldOrder, order);
+  }
+};
+
 module.exports.Update_order_item = async (req, res) => {
   const { id } = req.params;
   try {
     const oldOrder = await Order_items.findOne({ _id: id });
     await Order_items.updateOne({ _id: id }, { $set: { ...req.body } });
     const order = await Order_items.findOne({ _id: id });
+    const status = await handleOrderStatus(oldOrder, order);
+    if (!status) {
+      await Order_items.updateOne({ _id: id }, { $set: { ...oldOrder } });
+      throw new Error("No Sufficient Quantity");
+    }
     await handleWallet(oldOrder, order);
     res.status(200).json(order);
   } catch (error) {
