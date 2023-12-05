@@ -70,6 +70,7 @@ const productSchema = new Schema(
     },
     garment_id: {
       type: String,
+      default:""
     },
     linked_products: [String],
     color: {

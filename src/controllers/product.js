@@ -7,7 +7,7 @@ const HotSale = require("../models/hotsales");
 const Cart = require("../models/cart");
 const Wish = require("../models/wish");
 const mongoose = require("mongoose");
-const { MakeRequest, getmodels, requesttryon } = require("./vrRoom.js");
+const { MakeRequest, getmodels, requesttryon, makeModel } = require("./vrRoom.js");
 var cloudinary = require("../utils/cloudinary.js");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
@@ -248,6 +248,10 @@ module.exports.createProduct = async (req, res, next) => {
       quantity: body.quantity,
       linked_products: body.linked_products,
       view: true,
+      vrpos:body?.vrpos,
+      vrpossec:body?.vrpossec,
+      gender:body?.gender
+
     });
     const color = new Color({
       color_name: body.color,
@@ -1027,3 +1031,32 @@ module.exports.filter = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
+
+module.exports.createRequestVr=async(req,res)=>{
+  try {
+    console.log(req.body)
+    var requestBody={};
+    if(req.body.vrprop.vrpos==="bottoms"){
+    requestBody = {
+      category: req.body.vrprop.vrpos,
+      bottoms_sub_category:req.body.vrprop.vrpossec,
+      gender:req.body.vrprop.gender,
+      garment_img_url:req.body.image
+    };}
+    else{
+      requestBody = {
+        category: req.body.vrprop.vrpos,
+        gender: req.body.vrprop.gender,
+        garment_img_url: req.body.image
+      };
+    }
+    console.log(requestBody)
+    const response = await makeModel(requestBody)
+    const responseObject = JSON.parse(response);
+    await Product.updateOne({_id:req.body.productId},{garment_id:responseObject?.garment_id})
+      return res.status(200).json({message:"done"});
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+
+}

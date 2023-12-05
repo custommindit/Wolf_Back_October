@@ -151,5 +151,5 @@ const getAuthenticationHeader=(public_key, secret_key)=> {
 
 
 module.exports = {
-  MakeRequest,getmodels,requesttryon
+  MakeRequest,getmodels,requesttryon,makeModel
 };

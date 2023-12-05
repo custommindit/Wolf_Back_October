@@ -27,6 +27,7 @@ router.post(
   product_controller.uplodaImageCloud
 );
 router.post("/create", product_controller.createProduct);
+router.post("/createRequestVr", product_controller.createRequestVr);
 router.put("/:id", product_controller.editProduct);
 router.get("/totalNumOfProducts", product_controller.totalNumOfProducts);
 
