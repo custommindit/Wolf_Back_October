@@ -82,8 +82,9 @@ router.post(
   product_controller.getProductBySubCategory2filter
 );
 
-router.get("/filter/:field", product_controller.filter);
-// router.get("/filter/updatedAt", product_controller.filter);
+router.get("/filterByDate/:field", product_controller.filterByDate);
+
+router.get("/filter", product_controller.filter);
 
 router.get("/:id", product_controller.getProductById);
 
