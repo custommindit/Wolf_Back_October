@@ -42,7 +42,9 @@ const uploadFiles = async (req, res) => {
       const urls = await Promise.all(
         req.files.map(async (file) => {
           const data = await cloudinary.uploader.upload(file.path, {
+            
             folder: `${process.env.FOLDER_CLOUD_NAME}/images/`,
+            visual_search:"true"
           });
           await unlinkAsync(file.path);
           return {
